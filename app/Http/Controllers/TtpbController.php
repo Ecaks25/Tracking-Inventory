@@ -92,7 +92,7 @@ class TtpbController extends Controller
                 ->withErrors($e->errors());
         }
 
-        session(['ttpb_preview_ids' => $createdIds]);
+        session(["ttpb_preview_ids_{$role}" => $createdIds]);
 
         return redirect()->route("{$role}.ttpb.preview");
     }
