@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Ttpb;
 use App\Models\Bpg;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class TtpbController extends Controller
 {
@@ -67,19 +69,27 @@ class TtpbController extends Controller
         ]);
 
         $createdIds = [];
+        try {
+            DB::beginTransaction();
+            foreach ($validated['items'] as $item) {
+                $saldo = $this->calculateSaldo($item['lot_number'], $item['dari']);
 
-        foreach ($validated['items'] as $item) {
-            $saldo = $this->calculateSaldo($item['lot_number'], $item['dari']);
+                if ($item['qty_awal'] > $saldo) {
+                    throw ValidationException::withMessages([
+                        'qty_awal' => 'QTY tidak mencukupi',
+                    ]);
+                }
 
-            if ($item['qty_awal'] > $saldo) {
-                return back()
-                    ->withInput()
-                    ->withErrors(['qty_awal' => 'QTY tidak mencukupi']);
+                $record = Ttpb::create($item);
+                $createdIds[] = $record->id;
+                $role = $item['dari'];
             }
-
-            $record = Ttpb::create($item);
-            $createdIds[] = $record->id;
-            $role = $item['dari'];
+            DB::commit();
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return back()
+                ->withInput()
+                ->withErrors($e->errors());
         }
 
         session(['ttpb_preview_ids' => $createdIds]);
