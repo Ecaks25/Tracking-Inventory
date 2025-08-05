@@ -224,3 +224,50 @@ test('non pencucian role cannot submit moisture or deviation', function () {
         ->post('/gudang/ttpb', $payload)
         ->assertSessionHasErrors(['items.0.kadar_air', 'items.0.deviasi']);
 });
+
+test('no records are saved when any added row exceeds saldo', function () {
+    $user = User::factory()->create(['role' => 'gudang']);
+    $this->actingAs($user);
+
+    \App\Models\Bpg::factory()->create([
+        'lot_number' => 'LOT-Z',
+        'qty' => 10,
+        'nama_barang' => 'Barang',
+        'supplier' => 'Supp',
+    ]);
+
+    $payload = [
+        'items' => [
+            [
+                'tanggal' => '2024-01-01',
+                'no_ttpb' => 'TTPB-010',
+                'lot_number' => 'LOT-Z',
+                'nama_barang' => 'Barang',
+                'qty_awal' => 6,
+                'qty_aktual' => 6,
+                'qty_loss' => 0,
+                'persen_loss' => 0,
+                'dari' => 'gudang',
+                'ke' => 'pencucian',
+            ],
+            [
+                'tanggal' => '2024-01-01',
+                'no_ttpb' => 'TTPB-010',
+                'lot_number' => 'LOT-Z',
+                'nama_barang' => 'Barang',
+                'qty_awal' => 6,
+                'qty_aktual' => 6,
+                'qty_loss' => 0,
+                'persen_loss' => 0,
+                'dari' => 'gudang',
+                'ke' => 'pencucian',
+            ],
+        ],
+    ];
+
+    $this->from('/gudang/ttpb/create')
+        ->post('/gudang/ttpb', $payload)
+        ->assertSessionHasErrors('qty_awal');
+
+    $this->assertDatabaseCount('ttpbs', 0);
+});
