@@ -1,61 +1,79 @@
 @section('title', __('TTPB Preview'))
 <x-layouts.app :title="__('TTPB Preview')">
+    <style>
+        .ttpb-paper {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto 2rem;
+            padding: 10mm;
+            background: #fff;
+            border: 1px solid #000;
+        }
+        .ttpb-paper .header p {
+            margin: 0;
+        }
+        .ttpb-paper table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .ttpb-paper th,
+        .ttpb-paper td {
+            border: 1px solid #000;
+            padding: 4px;
+            font-size: 0.875rem;
+        }
+    </style>
+
     <h5 class="mb-4">{{ __('TTPB Preview') }}</h5>
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>{{ __('Tanggal') }}</th>
-                    <th>{{ __('No. TTPB') }}</th>
-                    <th>{{ __('Lot Number') }}</th>
-                    <th>{{ __('Nama Barang') }}</th>
-                    <th>{{ __('Dari') }}</th>
-                    <th>{{ __('Ke') }}</th>
-                    <th>{{ __('QTY Awal') }}</th>
-                    <th>{{ __('QTY Aktual') }}</th>
-                    <th>{{ __('Qty Loss Gudang') }}</th>
-                    <th>{{ __('% Loss Gudang') }}</th>
-                    @if ($role === 'pencucian')
-                        <th>{{ __('Kadar Air') }}</th>
-                        <th>{{ __('Deviasi') }}</th>
-                    @endif
-                    <th>{{ __('Coly') }}</th>
-                    <th>{{ __('Spec') }}</th>
-                    <th>{{ __('Keterangan') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($records as $item)
+
+    @php
+        $groups = $records->groupBy('no_ttpb');
+    @endphp
+
+    @forelse ($groups as $number => $items)
+        @php
+            $first = $items->first();
+        @endphp
+        <div class="ttpb-paper">
+            <div class="header mb-3">
+                <p>No.TTPB : {{ $number }}</p>
+                <p>Tanggal : {{ $first->tanggal }}</p>
+                <p>Dari : {{ ucfirst($first->dari) }}</p>
+                <p>Ke : {{ ucfirst($first->ke) }}</p>
+            </div>
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->tanggal }}</td>
-                        <td>{{ $item->no_ttpb }}</td>
-                        <td>{{ $item->lot_number }}</td>
-                        <td>{{ $item->nama_barang }}</td>
-                        <td>{{ ucfirst($item->dari) }}</td>
-                        <td>{{ ucfirst($item->ke) }}</td>
-                        <td>{{ $item->qty_awal }}</td>
-                        <td>{{ $item->qty_aktual }}</td>
-                        <td>{{ $item->qty_loss }}</td>
-                        <td>{{ $item->persen_loss }}</td>
-                        @if ($role === 'pencucian')
-                            <td>{{ $item->kadar_air }}</td>
-                            <td>{{ $item->deviasi }}</td>
-                        @endif
-                        <td>{{ $item->coly }}</td>
-                        <td>{{ $item->spec }}</td>
-                        <td>{{ $item->keterangan }}</td>
+                        <th>No. Lot</th>
+                        <th>Qty Awal</th>
+                        <th>Qty Aktual</th>
+                        <th>Qty Loss Gudang</th>
+                        <th>% Loss Gudang</th>
+                        <th>Coly</th>
+                        <th>Spec</th>
+                        <th>Keterangan</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="{{ $role === 'pencucian' ? 16 : 14 }}" class="text-center">{{ __('Belum ada data') }}</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach ($items as $item)
+                        <tr>
+                            <td>{{ $item->lot_number }}</td>
+                            <td>{{ $item->qty_awal }}</td>
+                            <td>{{ $item->qty_aktual }}</td>
+                            <td>{{ $item->qty_loss }}</td>
+                            <td>{{ $item->persen_loss }}</td>
+                            <td>{{ $item->coly }}</td>
+                            <td>{{ $item->spec }}</td>
+                            <td>{{ $item->keterangan }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @empty
+        <p class="text-center">{{ __('Belum ada data') }}</p>
+    @endforelse
 
     <a href="{{ route($role.'.ttpb') }}" class="btn btn-primary mt-3">{{ __('Kembali') }}</a>
 </x-layouts.app>
-
