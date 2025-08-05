@@ -1,0 +1,8 @@
+/* Sidebar collapsed behavior */
+html.layout-menu-collapsed #layout-menu .menu-link .text-truncate {
+  display: none;
+}
+
+#zoom-slider {
+  width: 100px;
+}
