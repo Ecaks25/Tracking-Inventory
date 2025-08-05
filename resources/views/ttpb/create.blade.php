@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const previewBody = document.querySelector('#preview-table tbody');
     const form = document.querySelector('form');
     let index = 0;
+    const stickyFields = ['tanggal', 'no_ttpb', 'dari', 'ke'];
 
     const currentRow = template.cloneNode(true);
     currentContainer.appendChild(currentRow);
@@ -205,12 +206,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function resetRow(row) {
         row.querySelectorAll('[data-name]').forEach(el => {
-            if (
-                el.dataset.name !== 'tanggal' &&
-                el.dataset.name !== 'no_ttpb' &&
-                el.dataset.name !== 'dari' &&
-                el.dataset.name !== 'ke'
-            ) {
+            if (!stickyFields.includes(el.dataset.name)) {
                 if (el.tagName === 'SELECT') {
                     el.selectedIndex = 0;
                 } else {
