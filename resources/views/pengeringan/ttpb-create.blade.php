@@ -132,7 +132,14 @@
 @section('page-script')
     <script>
         function parseNumber(val) {
-            return parseFloat((val || '').replace(/\./g, '').replace(',', '.')) || 0;
+            val = (val || '').trim();
+            if (!val) return 0;
+            if (val.includes('.') && val.includes(',')) {
+                val = val.replace(/\./g, '').replace(',', '.');
+            } else {
+                val = val.replace(',', '.');
+            }
+            return parseFloat(val) || 0;
         }
 
         document.getElementById('lot_number').addEventListener('change', function () {
