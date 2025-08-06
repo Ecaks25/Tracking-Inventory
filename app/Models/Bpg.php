@@ -16,6 +16,8 @@ class Bpg extends Model
         'supplier',
         'nama_barang',
         'qty',
+        'qty_aktual',
+        'qty_loss',
         'coly',
         'diterima',
         'ttpb',
@@ -23,5 +25,7 @@ class Bpg extends Model
 
     protected $casts = [
         'qty' => 'float',
+        'qty_aktual' => 'float',
+        'qty_loss' => 'float',
     ];
 }

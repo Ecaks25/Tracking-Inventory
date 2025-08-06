@@ -18,6 +18,8 @@
                         <th>Supplier</th>
                         <th>Nama Barang</th>
                         <th>QTY (kg)</th>
+                        <th>QTY Aktual</th>
+                        <th>Loss</th>
                         <th>Coly</th>
                         <th>Diterima Oleh</th>
                         <th>TTPB</th>
@@ -33,6 +35,8 @@
                             <td>{{ $item->supplier }}</td>
                             <td>{{ $item->nama_barang }}</td>
                             <td>{{ $item->qty }}</td>
+                            <td>{{ $item->qty_aktual }}</td>
+                            <td>{{ $item->qty_loss }}</td>
                             <td>{{ $item->coly }}</td>
                             <td>{{ $item->diterima }}</td>
                             <td>{{ $item->ttpb }}</td>
@@ -47,7 +51,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center">{{ __('Belum ada data') }}</td>
+                            <td colspan="12" class="text-center">{{ __('Belum ada data') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
