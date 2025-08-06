@@ -55,6 +55,31 @@ class TtpbController extends Controller
     }
     public function store(Request $request)
     {
+        // Support forms that submit a single record without wrapping fields in an
+        // `items` array. When the request doesn't contain an `items` key we
+        // assume all top level fields represent a single entry and wrap them
+        // accordingly so the rest of the method can handle them uniformly.
+        if (!$request->has('items')) {
+            $single = $request->only([
+                'tanggal',
+                'no_ttpb',
+                'lot_number',
+                'nama_barang',
+                'qty_awal',
+                'qty_aktual',
+                'qty_loss',
+                'persen_loss',
+                'kadar_air',
+                'deviasi',
+                'coly',
+                'spec',
+                'keterangan',
+                'ke',
+                'dari',
+            ]);
+            $request->merge(['items' => [$single]]);
+        }
+
         $items = collect($request->input('items', []))->map(function ($item) {
             $item['qty_awal'] = $this->normalizeNumber($item['qty_awal'] ?? null);
             $item['qty_aktual'] = $this->normalizeNumber($item['qty_aktual'] ?? null);
