@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\TtpbController;
 use App\Http\Controllers\BpgController;
+use App\Models\Bpg;
 use Carbon\Carbon;
 
 Route::get('/', function () {
@@ -51,7 +52,10 @@ Route::middleware(['auth'])->group(function () {
 
       return view("{$role}.stock", ['role' => $role, 'records' => $records]);
     })->name("{$role}.stock");
-    Route::get("{$role}/stock/create", fn () => view("{$role}.stock-create"))->name("{$role}.stock.create");
+    Route::get("{$role}/stock/create", function () use ($role) {
+      $lotNumbers = Bpg::pluck('lot_number');
+      return view("{$role}.stock-create", ['lotNumbers' => $lotNumbers]);
+    })->name("{$role}.stock.create");
     if ($role === 'gudang') {
       Route::post("{$role}/stock", [BpgController::class, 'store'])->name("{$role}.stock.store");
     }

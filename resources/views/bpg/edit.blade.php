@@ -19,7 +19,12 @@
                     </div>
                     <div class="col-md-6">
                         <label for="lot_number" class="form-label">{{ __('Lot Number') }}</label>
-                        <input type="text" id="lot_number" name="lot_number" class="form-control" value="{{ old('lot_number', $record->lot_number) }}" />
+                        <input list="lot_numbers" id="lot_number" name="lot_number" class="form-control" value="{{ old('lot_number', $record->lot_number) }}" placeholder="-- Pilih Lot Number --" />
+                        <datalist id="lot_numbers">
+                            @foreach($lotNumbers as $lot)
+                                <option value="{{ $lot }}"></option>
+                            @endforeach
+                        </datalist>
                     </div>
                     <div class="col-md-6">
                         <label for="supplier" class="form-label">{{ __('Supplier') }}</label>

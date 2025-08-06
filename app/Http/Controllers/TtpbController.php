@@ -12,7 +12,8 @@ class TtpbController extends Controller
 {
     public function edit(Ttpb $ttpb)
     {
-        return view('ttpb.edit', ['record' => $ttpb]);
+        $lotNumbers = Bpg::pluck('lot_number')->merge(Ttpb::pluck('lot_number'))->unique();
+        return view('ttpb.edit', ['record' => $ttpb, 'lotNumbers' => $lotNumbers]);
     }
 
     public function update(Request $request, Ttpb $ttpb)
