@@ -19,6 +19,7 @@ class BpgFactory extends Factory
             'no_bpg' => $this->faker->unique()->numerify('BPG-###'),
             'lot_number' => $this->faker->unique()->bothify('LOT-###'),
             'supplier' => $this->faker->company,
+            'nomor_mobil' => strtoupper($this->faker->bothify('?? #### ??')),
             'nama_barang' => $this->faker->word,
             'qty' => $qty,
             'qty_aktual' => $qtyAktual,
