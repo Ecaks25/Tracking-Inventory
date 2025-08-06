@@ -8,6 +8,11 @@
     <div class="card-body">
         <form method="POST" action="{{ route($role.'.ttpb.store') }}">
             @csrf
+            <datalist id="lot_numbers">
+                @foreach($stocks as $item)
+                    <option value="{{ $item->lot_number }}" data-nama-barang="{{ $item->nama_barang }}"></option>
+                @endforeach
+            </datalist>
             <div id="current-item"></div>
             <div id="items-container" class="d-none"></div>
             <button type="button" class="btn btn-secondary mt-3" id="add-row">{{ __('Tambah Baris') }}</button>
@@ -58,12 +63,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('Lot Number') }}</label>
-                        <select class="form-select lot-number" data-name="lot_number">
-                            <option value="">-- Pilih Lot Number --</option>
-                            @foreach($stocks as $item)
-                                <option value="{{ $item->lot_number }}" data-nama-barang="{{ $item->nama_barang }}">{{ $item->lot_number }}</option>
-                            @endforeach
-                        </select>
+                        <input list="lot_numbers" class="form-control lot-number" data-name="lot_number" placeholder="-- Pilih Lot Number --" />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('Nama Barang') }}</label>
@@ -194,9 +194,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function attachEvents(row) {
-        row.querySelector('.lot-number').addEventListener('change', function () {
-            const option = this.options[this.selectedIndex];
-            row.querySelector('.nama-barang').value = option.dataset.namaBarang || '';
+        row.querySelector('.lot-number').addEventListener('input', function () {
+            const option = document.querySelector(`#lot_numbers option[value="${this.value}"]`);
+            row.querySelector('.nama-barang').value = option ? option.dataset.namaBarang || '' : '';
             refreshPreview();
         });
         row.querySelectorAll('.qty-awal, .qty-aktual').forEach(el => {

@@ -11,6 +11,11 @@
         @endif
         <form method="POST" action="{{ route($role.'.ttpb.store') }}">
             @csrf
+            <datalist id="lot_numbers">
+                @foreach($stocks as $item)
+                    <option value="{{ $item->lot_number }}" data-nama-barang="{{ $item->nama_barang }}"></option>
+                @endforeach
+            </datalist>
             <div class="row g-4">
                 
                 <div class="col-md-6">
@@ -23,12 +28,7 @@
                 </div>
                 <div class="col-md-6">
                     <label for="lot_number" class="form-label">{{ __('Lot Number') }}</label>
-                    <select id="lot_number" name="lot_number" class="form-select">
-                        <option value="">-- Pilih Lot Number --</option>
-                        @foreach($stocks as $item)
-                            <option value="{{ $item->lot_number }}" data-nama-barang="{{ $item->nama_barang }}">{{ $item->lot_number }}</option>
-                        @endforeach
-                    </select>
+                    <input list="lot_numbers" id="lot_number" name="lot_number" class="form-control" placeholder="-- Pilih Lot Number --" />
                 </div>
                 <div class="col-md-6">
                     <label for="nama_barang" class="form-label">{{ __('Nama Barang') }}</label>
@@ -64,14 +64,9 @@
                 </div>
                 <div id="mix-details" style="display: none;" class="row g-4">
                     <div class="col-md-6">
-                        <label for="lot_number_mix" class="form-label">{{ __('Lot Number Mix') }}</label>
-                        <select id="lot_number_mix" name="lot_number_mix" class="form-select">
-                            <option value="">-- Pilih Lot Number --</option>
-                            @foreach($stocks as $item)
-                                <option value="{{ $item->lot_number }}">{{ $item->lot_number }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    <label for="lot_number_mix" class="form-label">{{ __('Lot Number Mix') }}</label>
+                    <input list="lot_numbers" id="lot_number_mix" name="lot_number_mix" class="form-control" placeholder="-- Pilih Lot Number --" />
+                </div>
                     <div class="col-md-6">
                         <label for="qty_awal_mix" class="form-label">{{ __('QTY Awal Mix') }}</label>
                         <input type="number" id="qty_awal_mix" name="qty_awal_mix" class="form-control" />
@@ -130,9 +125,9 @@
 </div>
 @section('page-script')
     <script>
-        document.getElementById('lot_number').addEventListener('change', function () {
-            const option = this.options[this.selectedIndex];
-            document.getElementById('nama_barang').value = option.dataset.namaBarang || '';
+        document.getElementById('lot_number').addEventListener('input', function () {
+            const option = document.querySelector(`#lot_numbers option[value="${this.value}"]`);
+            document.getElementById('nama_barang').value = option ? option.dataset.namaBarang || '' : '';
         });
 
         function updateLoss() {
@@ -176,8 +171,8 @@
         document.getElementById('qty_aktual').addEventListener('input', updateLoss);
         document.getElementById('ke').addEventListener('change', toggleMixOption);
         document.getElementById('di_mix').addEventListener('change', toggleMixDetails);
-        document.getElementById('lot_number').addEventListener('change', updateMixName);
-        document.getElementById('lot_number_mix').addEventListener('change', updateMixName);
+        document.getElementById('lot_number').addEventListener('input', updateMixName);
+        document.getElementById('lot_number_mix').addEventListener('input', updateMixName);
         toggleMixOption();
         toggleMixDetails();
     </script>
