@@ -26,4 +26,10 @@ class Ttpb extends Model
         'dari',
         'ke',
     ];
+
+    protected $casts = [
+        'qty_awal' => 'float',
+        'qty_aktual' => 'float',
+        'qty_loss' => 'float',
+    ];
 }

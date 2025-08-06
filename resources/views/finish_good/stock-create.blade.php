@@ -30,7 +30,7 @@
                 </div>
                 <div class="col-md-6">
                     <label for="qty" class="form-label">{{ __('QTY (kg)') }}</label>
-                    <input type="number" id="qty" class="form-control" />
+                    <input type="text" inputmode="decimal" id="qty" class="form-control" />
                 </div>
                 <div class="col-md-6">
                     <label for="coly" class="form-label">{{ __('Coly') }}</label>

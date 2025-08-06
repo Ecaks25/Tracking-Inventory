@@ -74,11 +74,11 @@
                     </div>
                     <div class="col-md-6">
                         <label for="qty_awal_mix" class="form-label">{{ __('QTY Awal Mix') }}</label>
-                        <input type="number" id="qty_awal_mix" name="qty_awal_mix" class="form-control" />
+                        <input type="text" inputmode="decimal" id="qty_awal_mix" name="qty_awal_mix" class="form-control" />
                     </div>
                     <div class="col-md-6">
                         <label for="qty_aktual_mix" class="form-label">{{ __('QTY Aktual Mix') }}</label>
-                        <input type="number" id="qty_aktual_mix" name="qty_aktual_mix" class="form-control" />
+                        <input type="text" inputmode="decimal" id="qty_aktual_mix" name="qty_aktual_mix" class="form-control" />
                     </div>
                     <div class="col-md-6">
                         <label for="loss_gd_mix" class="form-label">{{ __('Loss GD Mix') }}</label>
@@ -86,7 +86,7 @@
                     </div>
                     <div class="col-md-6">
                         <label for="loss_aktual_mix" class="form-label">{{ __('Loss Aktual Mix') }}</label>
-                        <input type="number" id="loss_aktual_mix" name="loss_aktual_mix" class="form-control" />
+                        <input type="text" inputmode="decimal" id="loss_aktual_mix" name="loss_aktual_mix" class="form-control" />
                     </div>
                     <div class="col-md-6">
                         <label for="lot_number_baru" class="form-label">{{ __('Lot Baru') }}</label>
@@ -95,15 +95,15 @@
                 </div>
                 <div class="col-md-6">
                     <label for="qty_awal" class="form-label">{{ __('QTY Awal') }}</label>
-                    <input type="number" id="qty_awal" name="qty_awal" class="form-control" />
+                    <input type="text" inputmode="decimal" id="qty_awal" name="qty_awal" class="form-control" />
                 </div>
                 <div class="col-md-6">
                     <label for="qty_aktual" class="form-label">{{ __('QTY Aktual') }}</label>
-                    <input type="number" id="qty_aktual" name="qty_aktual" class="form-control" />
+                    <input type="text" inputmode="decimal" id="qty_aktual" name="qty_aktual" class="form-control" />
                 </div>
                 <div class="col-md-6">
                     <label for="qty_loss" class="form-label">{{ __('Qty Loss Mixing') }}</label>
-                    <input type="number" id="qty_loss" name="qty_loss" class="form-control" />
+                    <input type="text" inputmode="decimal" id="qty_loss" name="qty_loss" class="form-control" />
                 </div>
                 <div class="col-md-6">
                     <label for="persen_loss" class="form-label">{{ __('% Loss Mixing') }}</label>
@@ -130,14 +130,18 @@
 </div>
 @section('page-script')
     <script>
+        function parseNumber(val) {
+            return parseFloat((val || '').replace(/\./g, '').replace(',', '.')) || 0;
+        }
+
         document.getElementById('lot_number').addEventListener('change', function () {
             const option = this.options[this.selectedIndex];
             document.getElementById('nama_barang').value = option.dataset.namaBarang || '';
         });
 
         function updateLoss() {
-            const qtyAwal = parseFloat(document.getElementById('qty_awal').value) || 0;
-            const qtyAktual = parseFloat(document.getElementById('qty_aktual').value) || 0;
+            const qtyAwal = parseNumber(document.getElementById('qty_awal').value);
+            const qtyAktual = parseNumber(document.getElementById('qty_aktual').value);
             const loss = qtyAwal - qtyAktual;
             const percent = qtyAwal ? (loss / qtyAwal) * 100 : 0;
             document.getElementById('qty_loss').value = loss;

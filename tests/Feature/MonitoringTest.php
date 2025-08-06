@@ -59,11 +59,11 @@ test('gudang monitoring shows sequential entries with running saldo', function (
         ->assertOk()
         ->assertViewHas('records', function ($records) {
             return $records->count() === 3
-                && $records[0]['qty_in_bpg'] === 10
-                && $records[0]['saldo'] === 10
-                && $records[1]['qty_in_ttpb'] === 5
-                && $records[1]['saldo'] === 15
-                && $records[2]['qty_out_ttpb'] === 3
-                && $records[2]['saldo'] === 12;
+                && $records[0]['qty_in_bpg'] == 10
+                && $records[0]['saldo'] == 10
+                && $records[1]['qty_in_ttpb'] == 5
+                && $records[1]['saldo'] == 15
+                && $records[2]['qty_out_ttpb'] == 3
+                && $records[2]['saldo'] == 12;
         });
 });

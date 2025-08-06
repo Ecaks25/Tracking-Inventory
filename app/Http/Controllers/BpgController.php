@@ -14,13 +14,17 @@ class BpgController extends Controller
 
     public function update(Request $request, Bpg $bpg)
     {
+        $request->merge([
+            'qty' => $this->normalizeNumber($request->input('qty')),
+        ]);
+
         $validated = $request->validate([
             'tanggal' => 'required|date',
             'no_bpg' => 'required|string',
             'lot_number' => 'required|string',
             'supplier' => 'required|string',
             'nama_barang' => 'required|string',
-            'qty' => 'required|integer',
+            'qty' => 'required|numeric',
             'coly' => 'nullable|string',
             'diterima' => 'required|string',
             'ttpb' => 'required|string',
@@ -39,13 +43,17 @@ class BpgController extends Controller
     }
     public function store(Request $request)
     {
+        $request->merge([
+            'qty' => $this->normalizeNumber($request->input('qty')),
+        ]);
+
         $validated = $request->validate([
             'tanggal' => 'required|date',
             'no_bpg' => 'required|string',
             'lot_number' => 'required|string',
             'supplier' => 'required|string',
             'nama_barang' => 'required|string',
-            'qty' => 'required|integer',
+            'qty' => 'required|numeric',
             'coly' => 'nullable|string',
             'diterima' => 'required|string',
             'ttpb' => 'required|string',
@@ -54,5 +62,13 @@ class BpgController extends Controller
         Bpg::create($validated);
 
         return redirect()->route('gudang.stock');
+    }
+
+    private function normalizeNumber($value)
+    {
+        if ($value === null) {
+            return $value;
+        }
+        return str_replace(',', '.', str_replace('.', '', $value));
     }
 }

@@ -91,15 +91,15 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('QTY Awal') }}</label>
-                        <input type="number" class="form-control qty-awal" data-name="qty_awal" />
+                        <input type="text" inputmode="decimal" class="form-control qty-awal" data-name="qty_awal" />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('QTY Aktual') }}</label>
-                        <input type="number" class="form-control qty-aktual" data-name="qty_aktual" />
+                        <input type="text" inputmode="decimal" class="form-control qty-aktual" data-name="qty_aktual" />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('Qty Loss') }}</label>
-                        <input type="number" class="form-control qty-loss" data-name="qty_loss" readonly />
+                        <input type="text" inputmode="decimal" class="form-control qty-loss" data-name="qty_loss" readonly />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('% Loss') }}</label>
@@ -143,6 +143,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
     let index = 0;
     const stickyFields = ['tanggal', 'no_ttpb', 'dari', 'ke'];
+
+    function parseNumber(val) {
+        return parseFloat((val || '').replace(/\./g, '').replace(',', '.')) || 0;
+    }
 
     const currentRow = template.cloneNode(true);
     currentContainer.appendChild(currentRow);
@@ -190,8 +194,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         row.querySelectorAll('.qty-awal, .qty-aktual').forEach(el => {
             el.addEventListener('input', function () {
-                const awal = parseFloat(row.querySelector('.qty-awal').value) || 0;
-                const aktual = parseFloat(row.querySelector('.qty-aktual').value) || 0;
+                const awal = parseNumber(row.querySelector('.qty-awal').value);
+                const aktual = parseNumber(row.querySelector('.qty-aktual').value);
                 const loss = awal - aktual;
                 const percent = awal ? (loss / awal) * 100 : 0;
                 row.querySelector('.qty-loss').value = loss;
