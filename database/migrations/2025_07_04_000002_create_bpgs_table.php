@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('lot_number');
             $table->string('supplier');
             $table->string('nama_barang');
-            $table->integer('qty');
+            $table->double('qty');
             $table->string('coly')->nullable();
             $table->string('diterima');
             $table->string('ttpb');

@@ -31,7 +31,7 @@
                     </div>
                     <div class="col-md-6">
                         <label for="qty" class="form-label">{{ __('QTY (kg)') }}</label>
-                        <input type="number" id="qty" name="qty" class="form-control" value="{{ old('qty', $record->qty) }}" />
+                        <input type="text" inputmode="decimal" id="qty" name="qty" class="form-control" value="{{ old('qty', $record->qty) }}" />
                     </div>
                     <div class="col-md-6">
                         <label for="coly" class="form-label">{{ __('Coly') }}</label>

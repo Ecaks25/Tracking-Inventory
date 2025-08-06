@@ -17,14 +17,20 @@ class TtpbController extends Controller
 
     public function update(Request $request, Ttpb $ttpb)
     {
+        $request->merge([
+            'qty_awal' => $this->normalizeNumber($request->input('qty_awal')),
+            'qty_aktual' => $this->normalizeNumber($request->input('qty_aktual')),
+            'qty_loss' => $this->normalizeNumber($request->input('qty_loss')),
+        ]);
+
         $validated = $request->validate([
             'tanggal' => 'required|date',
             'no_ttpb' => 'required|string',
             'lot_number' => 'required|string',
             'nama_barang' => 'required|string',
-            'qty_awal' => 'required|integer',
-            'qty_aktual' => 'required|integer',
-            'qty_loss' => 'nullable|integer',
+            'qty_awal' => 'required|numeric',
+            'qty_aktual' => 'required|numeric',
+            'qty_loss' => 'nullable|numeric',
             'persen_loss' => 'nullable|numeric',
             'kadar_air' => 'nullable|numeric|prohibited_unless:dari,pencucian',
             'deviasi' => 'nullable|numeric|prohibited_unless:dari,pencucian',
@@ -49,15 +55,23 @@ class TtpbController extends Controller
     }
     public function store(Request $request)
     {
+        $items = collect($request->input('items', []))->map(function ($item) {
+            $item['qty_awal'] = $this->normalizeNumber($item['qty_awal'] ?? null);
+            $item['qty_aktual'] = $this->normalizeNumber($item['qty_aktual'] ?? null);
+            $item['qty_loss'] = $this->normalizeNumber($item['qty_loss'] ?? null);
+            return $item;
+        })->toArray();
+        $request->merge(['items' => $items]);
+
         $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.tanggal' => 'required|date',
             'items.*.no_ttpb' => 'required|string',
             'items.*.lot_number' => 'required|string',
             'items.*.nama_barang' => 'required|string',
-            'items.*.qty_awal' => 'required|integer',
-            'items.*.qty_aktual' => 'required|integer',
-            'items.*.qty_loss' => 'nullable|integer',
+            'items.*.qty_awal' => 'required|numeric',
+            'items.*.qty_aktual' => 'required|numeric',
+            'items.*.qty_loss' => 'nullable|numeric',
             'items.*.persen_loss' => 'nullable|numeric',
             'items.*.kadar_air' => 'nullable|numeric|prohibited_unless:items.*.dari,pencucian',
             'items.*.deviasi' => 'nullable|numeric|prohibited_unless:items.*.dari,pencucian',
@@ -97,7 +111,7 @@ class TtpbController extends Controller
         return redirect()->route("{$role}.ttpb.preview");
     }
 
-    private function calculateSaldo(string $lot, string $role): int
+    private function calculateSaldo(string $lot, string $role): float
     {
         if ($role === 'gudang') {
             $incoming = Bpg::where('lot_number', $lot)->sum('qty')
@@ -111,5 +125,13 @@ class TtpbController extends Controller
         $outgoing = Ttpb::where('dari', $role)->where('lot_number', $lot)->sum('qty_awal');
 
         return $incoming - $outgoing;
+    }
+
+    private function normalizeNumber($value)
+    {
+        if ($value === null) {
+            return $value;
+        }
+        return str_replace(',', '.', str_replace('.', '', $value));
     }
 }

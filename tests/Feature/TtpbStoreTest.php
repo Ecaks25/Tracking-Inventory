@@ -40,6 +40,45 @@ test('store ttpb redirects to ttpb index', function () {
     $this->assertDatabaseHas('ttpbs', ['no_ttpb' => 'TTPB-001']);
 });
 
+test('store ttpb accepts qty values with comma', function () {
+    $user = User::factory()->create(['role' => 'gudang']);
+    $this->actingAs($user);
+
+    \App\Models\Bpg::factory()->create([
+        'lot_number' => 'LOT-C',
+        'qty' => 5000,
+        'nama_barang' => 'Barang',
+        'supplier' => 'Supp',
+    ]);
+
+    $data = [
+        'items' => [[
+            'tanggal' => '2024-01-01',
+            'no_ttpb' => 'TTPB-010',
+            'lot_number' => 'LOT-C',
+            'nama_barang' => 'Barang',
+            'qty_awal' => '4.000,9',
+            'qty_aktual' => '3.500,5',
+            'qty_loss' => '500,4',
+            'persen_loss' => 10,
+            'coly' => 'A',
+            'spec' => 'Spec',
+            'keterangan' => 'Test',
+            'dari' => 'gudang',
+            'ke' => 'pencucian',
+        ]],
+    ];
+
+    $response = $this->post('/gudang/ttpb', $data);
+
+    $response->assertRedirect('/gudang/ttpb/preview');
+    $this->assertDatabaseHas('ttpbs', [
+        'no_ttpb' => 'TTPB-010',
+        'qty_awal' => 4000.9,
+        'qty_aktual' => 3500.5,
+    ]);
+});
+
 test('store ttpb saves all rows including added ones', function () {
     $user = User::factory()->create(['role' => 'gudang']);
     $this->actingAs($user);

@@ -35,15 +35,15 @@
                     </div>
                     <div class="col-md-6">
                         <label for="qty_awal" class="form-label">{{ __('QTY Awal') }}</label>
-                        <input type="number" id="qty_awal" name="qty_awal" class="form-control" value="{{ old('qty_awal', $record->qty_awal) }}" />
+                        <input type="text" inputmode="decimal" id="qty_awal" name="qty_awal" class="form-control" value="{{ old('qty_awal', $record->qty_awal) }}" />
                     </div>
                     <div class="col-md-6">
                         <label for="qty_aktual" class="form-label">{{ __('QTY Aktual') }}</label>
-                        <input type="number" id="qty_aktual" name="qty_aktual" class="form-control" value="{{ old('qty_aktual', $record->qty_aktual) }}" />
+                        <input type="text" inputmode="decimal" id="qty_aktual" name="qty_aktual" class="form-control" value="{{ old('qty_aktual', $record->qty_aktual) }}" />
                     </div>
                     <div class="col-md-6">
                         <label for="qty_loss" class="form-label">{{ __('Qty Loss') }}</label>
-                        <input type="number" id="qty_loss" name="qty_loss" class="form-control" value="{{ old('qty_loss', $record->qty_loss) }}" />
+                        <input type="text" inputmode="decimal" id="qty_loss" name="qty_loss" class="form-control" value="{{ old('qty_loss', $record->qty_loss) }}" />
                     </div>
                     <div class="col-md-6">
                         <label for="persen_loss" class="form-label">{{ __('% Loss') }}</label>

@@ -20,4 +20,8 @@ class Bpg extends Model
         'diterima',
         'ttpb',
     ];
+
+    protected $casts = [
+        'qty' => 'float',
+    ];
 }
