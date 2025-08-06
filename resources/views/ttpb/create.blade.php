@@ -145,7 +145,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const stickyFields = ['tanggal', 'no_ttpb', 'dari', 'ke'];
 
     function parseNumber(val) {
-        return parseFloat((val || '').replace(/\./g, '').replace(',', '.')) || 0;
+        val = (val || '').trim();
+        if (!val) return 0;
+        if (val.includes('.') && val.includes(',')) {
+            val = val.replace(/\./g, '').replace(',', '.');
+        } else {
+            val = val.replace(',', '.');
+        }
+        return parseFloat(val) || 0;
     }
 
     const currentRow = template.cloneNode(true);

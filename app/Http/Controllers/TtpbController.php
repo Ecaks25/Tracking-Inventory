@@ -130,8 +130,18 @@ class TtpbController extends Controller
     private function normalizeNumber($value)
     {
         if ($value === null) {
-            return $value;
+            return null;
         }
-        return str_replace(',', '.', str_replace('.', '', $value));
+
+        $value = trim($value);
+
+        if (strpos($value, ',') !== false && strpos($value, '.') !== false) {
+            $value = str_replace('.', '', $value);
+            $value = str_replace(',', '.', $value);
+        } else {
+            $value = str_replace(',', '.', $value);
+        }
+
+        return (float) $value;
     }
 }
