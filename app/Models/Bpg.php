@@ -14,6 +14,7 @@ class Bpg extends Model
         'no_bpg',
         'lot_number',
         'supplier',
+        'nomor_mobil',
         'nama_barang',
         'qty',
         'qty_aktual',

@@ -23,6 +23,10 @@
                     <input type="text" id="supplier" name="supplier" class="form-control" />
                 </div>
                 <div class="col-md-6">
+                    <label for="nomor_mobil" class="form-label">{{ __('Nomor Mobil') }}</label>
+                    <input type="text" id="nomor_mobil" name="nomor_mobil" class="form-control" />
+                </div>
+                <div class="col-md-6">
                     <label for="nama_barang" class="form-label">{{ __('Nama Barang') }}</label>
                     <input type="text" id="nama_barang" name="nama_barang" class="form-control" />
                 </div>

@@ -16,6 +16,7 @@
                         <th>Tanggal</th>
                         <th>Lot Number</th>
                         <th>Supplier</th>
+                        <th>Nomor Mobil</th>
                         <th>Nama Barang</th>
                         <th>QTY (kg)</th>
                         <th>QTY Aktual</th>
@@ -33,6 +34,7 @@
                             <td>{{ $item->tanggal }}</td>
                             <td>{{ $item->lot_number }}</td>
                             <td>{{ $item->supplier }}</td>
+                            <td>{{ $item->nomor_mobil }}</td>
                             <td>{{ $item->nama_barang }}</td>
                             <td>{{ $item->qty }}</td>
                             <td>{{ $item->qty_aktual }}</td>
@@ -51,7 +53,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="12" class="text-center">{{ __('Belum ada data') }}</td>
+                            <td colspan="13" class="text-center">{{ __('Belum ada data') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
