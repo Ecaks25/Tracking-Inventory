@@ -14,9 +14,9 @@ return new class extends Migration
             $table->string('no_ttpb');
             $table->string('lot_number');
             $table->string('nama_barang');
-            $table->integer('qty_awal');
-            $table->integer('qty_aktual');
-            $table->integer('qty_loss')->nullable();
+            $table->double('qty_awal');
+            $table->double('qty_aktual');
+            $table->double('qty_loss')->nullable();
             $table->decimal('persen_loss', 5, 2)->nullable();
             $table->decimal('kadar_air', 5, 2)->nullable();
             $table->decimal('deviasi', 5, 2)->nullable();
