@@ -9,7 +9,8 @@ class BpgController extends Controller
 {
     public function edit(Bpg $bpg)
     {
-        return view('bpg.edit', ['record' => $bpg]);
+        $lotNumbers = Bpg::pluck('lot_number');
+        return view('bpg.edit', ['record' => $bpg, 'lotNumbers' => $lotNumbers]);
     }
 
     public function update(Request $request, Bpg $bpg)
