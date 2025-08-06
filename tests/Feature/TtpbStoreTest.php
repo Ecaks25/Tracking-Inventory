@@ -148,6 +148,43 @@ test('store ttpb saves all rows including added ones', function () {
     ]);
 });
 
+test('store ttpb handles single item input without array', function () {
+    $user = User::factory()->create(['role' => 'gudang']);
+    $this->actingAs($user);
+
+    \App\Models\Bpg::factory()->create([
+        'lot_number' => 'LOT-S',
+        'qty' => 30,
+        'nama_barang' => 'Barang',
+        'supplier' => 'Supp',
+    ]);
+
+    $payload = [
+        'tanggal' => '2024-02-01',
+        'no_ttpb' => 'TTPB-020',
+        'lot_number' => 'LOT-S',
+        'nama_barang' => 'Barang',
+        'qty_awal' => 10,
+        'qty_aktual' => 9,
+        'qty_loss' => 1,
+        'persen_loss' => 10,
+        'coly' => 'A',
+        'spec' => 'Spec',
+        'keterangan' => 'Test',
+        'dari' => 'gudang',
+        'ke' => 'pencucian',
+    ];
+
+    $this->post('/gudang/ttpb', $payload)->assertRedirect('/gudang/ttpb/preview');
+
+    $this->assertDatabaseHas('ttpbs', [
+        'no_ttpb' => 'TTPB-020',
+        'lot_number' => 'LOT-S',
+        'qty_awal' => 10,
+        'qty_aktual' => 9,
+    ]);
+});
+
 test('new record is created when the same lot number is sent again', function () {
     $user = User::factory()->create(['role' => 'gudang']);
     $this->actingAs($user);
