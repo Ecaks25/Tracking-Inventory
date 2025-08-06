@@ -31,6 +31,14 @@
                     <input type="text" inputmode="decimal" id="qty" name="qty" class="form-control" />
                 </div>
                 <div class="col-md-6">
+                    <label for="qty_aktual" class="form-label">{{ __('QTY Aktual') }}</label>
+                    <input type="text" inputmode="decimal" id="qty_aktual" name="qty_aktual" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label for="qty_loss" class="form-label">{{ __('Loss') }}</label>
+                    <input type="text" inputmode="decimal" id="qty_loss" name="qty_loss" class="form-control" readonly />
+                </div>
+                <div class="col-md-6">
                     <label for="coly" class="form-label">{{ __('Coly') }}</label>
                     <input type="text" id="coly" name="coly" class="form-control" />
                 </div>
@@ -49,3 +57,16 @@
         </form>
     </div>
 </div>
+
+@section('page-script')
+    <script>
+        function updateLoss() {
+            const qty = parseFloat(document.getElementById('qty').value) || 0;
+            const qtyAktual = parseFloat(document.getElementById('qty_aktual').value) || 0;
+            document.getElementById('qty_loss').value = qty - qtyAktual;
+        }
+
+        document.getElementById('qty').addEventListener('input', updateLoss);
+        document.getElementById('qty_aktual').addEventListener('input', updateLoss);
+    </script>
+@endsection

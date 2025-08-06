@@ -16,6 +16,8 @@ class BpgController extends Controller
     {
         $request->merge([
             'qty' => $this->normalizeNumber($request->input('qty')),
+            'qty_aktual' => $this->normalizeNumber($request->input('qty_aktual')),
+            'qty_loss' => $this->normalizeNumber($request->input('qty_loss')),
         ]);
 
         $validated = $request->validate([
@@ -25,10 +27,14 @@ class BpgController extends Controller
             'supplier' => 'required|string',
             'nama_barang' => 'required|string',
             'qty' => 'required|numeric',
+            'qty_aktual' => 'required|numeric',
+            'qty_loss' => 'nullable|numeric',
             'coly' => 'nullable|string',
             'diterima' => 'required|string',
             'ttpb' => 'required|string',
         ]);
+
+        $validated['qty_loss'] = $validated['qty'] - $validated['qty_aktual'];
 
         $bpg->update($validated);
 
@@ -45,6 +51,8 @@ class BpgController extends Controller
     {
         $request->merge([
             'qty' => $this->normalizeNumber($request->input('qty')),
+            'qty_aktual' => $this->normalizeNumber($request->input('qty_aktual')),
+            'qty_loss' => $this->normalizeNumber($request->input('qty_loss')),
         ]);
 
         $validated = $request->validate([
@@ -54,10 +62,14 @@ class BpgController extends Controller
             'supplier' => 'required|string',
             'nama_barang' => 'required|string',
             'qty' => 'required|numeric',
+            'qty_aktual' => 'required|numeric',
+            'qty_loss' => 'nullable|numeric',
             'coly' => 'nullable|string',
             'diterima' => 'required|string',
             'ttpb' => 'required|string',
         ]);
+
+        $validated['qty_loss'] = $validated['qty'] - $validated['qty_aktual'];
 
         Bpg::create($validated);
 
