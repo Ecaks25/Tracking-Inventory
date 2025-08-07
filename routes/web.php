@@ -202,6 +202,11 @@ Route::middleware(['auth'])->group(function () {
     })->name("{$role}.monitoring");
   }
 
+  Route::view('mixing/barang-jadi', 'mixing.barang-jadi', ['role' => 'mixing'])
+    ->name('mixing.barang_jadi');
+  Route::view('grinding/barang-jadi', 'grinding.barang-jadi', ['role' => 'grinding'])
+    ->name('grinding.barang_jadi');
+
   Route::get('monitoring/stock', function () use ($roles) {
     $data = [];
     foreach ($roles as $role) {
