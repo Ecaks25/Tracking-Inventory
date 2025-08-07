@@ -116,6 +116,9 @@
               <li class="menu-item {{ request()->routeIs('mixing.monitoring') ? 'active' : '' }}">
                 <a class="menu-link" href="{{ route('mixing.monitoring') }}" wire:navigate>Monitoring</a>
               </li>
+              <li class="menu-item {{ request()->routeIs('mixing.barang_jadi') ? 'active' : '' }}">
+                <a class="menu-link" href="{{ route('mixing.barang_jadi') }}" wire:navigate>Barang Jadi</a>
+              </li>
               <li class="menu-item {{ request()->routeIs('mixing.ttpb') ? 'active' : '' }}">
                 <a class="menu-link" href="{{ route('mixing.ttpb') }}" wire:navigate>TTPB</a>
               </li>
@@ -135,6 +138,9 @@
               </li>
               <li class="menu-item {{ request()->routeIs('grinding.monitoring') ? 'active' : '' }}">
                 <a class="menu-link" href="{{ route('grinding.monitoring') }}" wire:navigate>Monitoring</a>
+              </li>
+              <li class="menu-item {{ request()->routeIs('grinding.barang_jadi') ? 'active' : '' }}">
+                <a class="menu-link" href="{{ route('grinding.barang_jadi') }}" wire:navigate>Barang Jadi</a>
               </li>
               <li class="menu-item {{ request()->routeIs('grinding.ttpb') ? 'active' : '' }}">
                 <a class="menu-link" href="{{ route('grinding.ttpb') }}" wire:navigate>TTPB</a>
@@ -286,6 +292,9 @@
               <li class="menu-item {{ request()->routeIs('mixing.monitoring') ? 'active' : '' }}">
                 <a class="menu-link" href="{{ route('mixing.monitoring') }}" wire:navigate>Monitoring</a>
               </li>
+              <li class="menu-item {{ request()->routeIs('mixing.barang_jadi') ? 'active' : '' }}">
+                <a class="menu-link" href="{{ route('mixing.barang_jadi') }}" wire:navigate>Barang Jadi</a>
+              </li>
               <li class="menu-item {{ request()->routeIs('mixing.ttpb') ? 'active' : '' }}">
                 <a class="menu-link" href="{{ route('mixing.ttpb') }}" wire:navigate>TTPB</a>
               </li>
@@ -307,6 +316,9 @@
               </li>
               <li class="menu-item {{ request()->routeIs('grinding.monitoring') ? 'active' : '' }}">
                 <a class="menu-link" href="{{ route('grinding.monitoring') }}" wire:navigate>Monitoring</a>
+              </li>
+              <li class="menu-item {{ request()->routeIs('grinding.barang_jadi') ? 'active' : '' }}">
+                <a class="menu-link" href="{{ route('grinding.barang_jadi') }}" wire:navigate>Barang Jadi</a>
               </li>
               <li class="menu-item {{ request()->routeIs('grinding.ttpb') ? 'active' : '' }}">
                 <a class="menu-link" href="{{ route('grinding.ttpb') }}" wire:navigate>TTPB</a>
