@@ -94,9 +94,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post("{$role}/ttpb", [TtpbController::class, 'store'])->name("{$role}.ttpb.store");
 
     Route::get("{$role}/ttpb/preview", function () use ($role) {
-      $ids = session("ttpb_preview_ids_{$role}", []);
+      $ids = session()->get("ttpb_preview_ids_{$role}", []);
       $records = App\Models\Ttpb::where('dari', $role)
-        ->whereIn('id', array_unique($ids))
+        ->whereIn('id', $ids)
         ->get();
       return view('ttpb.preview', ['role' => $role, 'records' => $records]);
     })->name("{$role}.ttpb.preview");
