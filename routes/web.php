@@ -28,9 +28,53 @@ Route::middleware(['auth'])->group(function () {
 
   foreach ($roles as $role) {
     Route::get("{$role}/stock", function () use ($role) {
-      $query = $role === 'gudang'
-        ? App\Models\Bpg::query()
-        : App\Models\Ttpb::where('ke', $role);
+      if ($role === 'gudang') {
+        $bpgQuery = App\Models\Bpg::query();
+        $ttpbQuery = App\Models\Ttpb::where('ke', 'gudang');
+
+        if ($month = request('month')) {
+          try {
+            $date = Carbon::parse($month . '-01');
+            $bpgQuery->whereYear('tanggal', $date->year)
+              ->whereMonth('tanggal', $date->month);
+            $ttpbQuery->whereYear('tanggal', $date->year)
+              ->whereMonth('tanggal', $date->month);
+          } catch (\Exception $e) {
+            // Ignore invalid month
+          }
+        }
+
+        if ($lot = request('lot')) {
+          $bpgQuery->where('lot_number', 'like', "%$lot%");
+          $ttpbQuery->where('lot_number', 'like', "%$lot%");
+        }
+
+        $bpgRecords = $bpgQuery->orderBy('lot_number')
+          ->orderBy('tanggal')
+          ->get();
+
+        $ttpbRecords = $ttpbQuery->orderBy('lot_number')
+          ->orderBy('tanggal')
+          ->get()
+          ->map(function ($item) {
+            $item->no_bpg = $item->no_ttpb;
+            $item->supplier = '-';
+            $item->nomor_mobil = '-';
+            $item->qty = $item->qty_awal;
+            $item->diterima = '-';
+            $item->ttpb = $item->no_ttpb;
+            return $item;
+          });
+
+        $records = $bpgRecords->concat($ttpbRecords)
+          ->sortBy('lot_number')
+          ->sortBy('tanggal')
+          ->values();
+
+        return view("{$role}.stock", ['role' => $role, 'records' => $records]);
+      }
+
+      $query = App\Models\Ttpb::where('ke', $role);
 
       if ($month = request('month')) {
         try {
