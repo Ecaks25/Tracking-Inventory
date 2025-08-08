@@ -17,33 +17,7 @@
             <div id="items-container" class="d-none"></div>
             <button type="button" class="btn btn-secondary mt-3" id="add-row">{{ __('Tambah Baris') }}</button>
 
-            <div class="mt-4">
-                <table class="table" id="preview-table">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Tanggal</th>
-                            <th>No. TTPB</th>
-                            <th>Lot Number</th>
-                            <th>Nama Barang</th>
-                            <th>Dari</th>
-                            <th>Ke</th>
-                            <th>QTY Awal</th>
-                            <th>QTY Aktual</th>
-                            <th>Qty Loss</th>
-                            <th>% Loss</th>
-                            @if ($role === 'pencucian')
-                                <th>Kadar Air</th>
-                                <th>Deviasi</th>
-                            @endif
-                            <th>Coly</th>
-                            <th>Spec</th>
-                            <th>Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+            <div class="mt-4" id="preview-container"></div>
 
             <div class="mt-4 d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">{{ __('Simpan') }}</button>
@@ -139,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const template = document.getElementById('item-template').content.firstElementChild;
     const currentContainer = document.getElementById('current-item');
     const itemsContainer = document.getElementById('items-container');
-    const previewBody = document.querySelector('#preview-table tbody');
+    const previewContainer = document.getElementById('preview-container');
     const form = document.querySelector('form');
     let index = 0;
     const stickyFields = ['tanggal', 'no_ttpb', 'dari', 'ke'];
@@ -231,17 +205,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function refreshPreview() {
-        previewBody.innerHTML = '';
-        const rows = itemsContainer.querySelectorAll('.item-row');
-        rows.forEach((row, idx) => {
-            const data = collectData(row);
-            previewBody.appendChild(buildRow(data, idx));
-        });
+        previewContainer.innerHTML = '';
+        const dataRows = Array.from(itemsContainer.querySelectorAll('.item-row'))
+            .map(row => collectData(row));
 
-        const data = collectData(currentRow);
-        if (Object.values(data).some(v => v)) {
-            previewBody.appendChild(buildRow(data, rows.length));
+        const currentData = collectData(currentRow);
+        if (Object.values(currentData).some(v => v)) {
+            dataRows.push(currentData);
         }
+
+        const groups = dataRows.reduce((acc, item) => {
+            if (!acc[item.no]) acc[item.no] = [];
+            acc[item.no].push(item);
+            return acc;
+        }, {});
+
+        Object.keys(groups).forEach(number => {
+            previewContainer.appendChild(buildCard(number, groups[number]));
+        });
     }
 
     function collectData(row) {
@@ -266,15 +247,23 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
-    function buildRow(data, idx) {
-        let html = `<td>${idx + 1}</td><td>${data.tanggal}</td><td>${data.no}</td><td>${data.lot}</td><td>${data.nama}</td><td>${data.dari}</td><td>${data.ke}</td><td>${data.awal}</td><td>${data.aktual}</td><td>${data.loss}</td><td>${data.persen}</td>`;
-        @if ($role === 'pencucian')
-            html += `<td>${data.kadar}</td><td>${data.deviasi}</td>`;
-        @endif
-        html += `<td>${data.coly}</td><td>${data.spec}</td><td>${data.ket}</td>`;
-        const tr = document.createElement('tr');
-        tr.innerHTML = html;
-        return tr;
+    function buildCard(number, items) {
+        const first = items[0];
+        let html = `<div class="card mb-3"><div class="card-body"><div class="mb-3">`;
+        html += `<p>No.TTPB : ${number}</p>`;
+        html += `<p>Tanggal : ${first.tanggal}</p>`;
+        html += `<p>Dari : ${first.dari}</p>`;
+        html += `<p>Ke : ${first.ke}</p>`;
+        html += `</div><div class="table-responsive"><table class="table table-bordered"><thead class="table-light"><tr>`;
+        html += `<th>No. Lot</th><th>Qty Awal</th><th>Qty Aktual</th><th>Qty Loss Gudang</th><th>% Loss Gudang</th><th>Coly</th><th>Spec</th><th>Keterangan</th>`;
+        html += `</tr></thead><tbody>`;
+        items.forEach(item => {
+            html += `<tr><td>${item.lot}</td><td>${item.awal}</td><td>${item.aktual}</td><td>${item.loss}</td><td>${item.persen}</td><td>${item.coly}</td><td>${item.spec}</td><td>${item.ket}</td></tr>`;
+        });
+        html += `</tbody></table></div></div></div>`;
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        return wrapper.firstChild;
     }
 });
 </script>
