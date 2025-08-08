@@ -7,7 +7,6 @@
     </div>
     <div class="card-body">
 @include('partials.month-filter')
-        <a href="{{ route($role.'.ttpb.create') }}" class="btn btn-primary mb-4">{{ __('Isi TTPB') }}</a>
         <div class="table-responsive text-nowrap">
             <table class="table table-striped table-bordered">
                 <thead>
