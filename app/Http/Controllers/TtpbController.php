@@ -132,7 +132,9 @@ class TtpbController extends Controller
                 ->withErrors($e->errors());
         }
 
-        session(["ttpb_preview_ids_{$role}" => $createdIds]);
+        $existingIds = session("ttpb_preview_ids_{$role}", []);
+        $allIds = array_unique(array_merge($existingIds, $createdIds));
+        session(["ttpb_preview_ids_{$role}" => $allIds]);
 
         return redirect()->route("{$role}.ttpb.preview");
     }
