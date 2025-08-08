@@ -347,3 +347,43 @@ test('no records are saved when any added row exceeds saldo', function () {
 
     $this->assertDatabaseCount('ttpbs', 0);
 });
+
+test('stored ttpb appears in preview and receiving stock', function () {
+    $gudangUser = User::factory()->create(['role' => 'gudang']);
+    $pencucianUser = User::factory()->create(['role' => 'pencucian']);
+    $this->actingAs($gudangUser);
+
+    \App\Models\Bpg::factory()->create([
+        'lot_number' => 'LOT-P',
+        'qty' => 10,
+        'nama_barang' => 'Barang',
+        'supplier' => 'Supp',
+    ]);
+
+    $payload = [
+        'tanggal' => '2024-01-01',
+        'no_ttpb' => 'TTPB-050',
+        'lot_number' => 'LOT-P',
+        'nama_barang' => 'Barang',
+        'qty_awal' => 5,
+        'qty_aktual' => 5,
+        'qty_loss' => 0,
+        'persen_loss' => 0,
+        'dari' => 'gudang',
+        'ke' => 'pencucian',
+    ];
+
+    $this->post('/gudang/ttpb', $payload)->assertRedirect('/gudang/ttpb/preview');
+
+    $this->get('/gudang/ttpb/preview')
+        ->assertOk()
+        ->assertSee('LOT-P');
+
+    $this->actingAs($pencucianUser);
+    $this->getJson('/pencucian/api/ttpb/LOT-P')
+        ->assertOk()
+        ->assertJson([
+            'nama_barang' => 'Barang',
+            'qty_aktual' => 5,
+        ]);
+});
