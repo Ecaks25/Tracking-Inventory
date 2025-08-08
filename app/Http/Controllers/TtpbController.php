@@ -129,6 +129,7 @@ class TtpbController extends Controller
                 }
 
                 $record = Ttpb::create($item);
+                $this->storeRoleSpecificRecords($item);
                 $createdIds[] = $record->id;
             }
             DB::commit();
@@ -144,6 +145,50 @@ class TtpbController extends Controller
         session()->put("ttpb_preview_ids_{$role}", $allIds);
 
         return redirect()->route("{$role}.ttpb.preview");
+    }
+
+    private function storeRoleSpecificRecords(array $item): void
+    {
+        $this->insertIntoRoleTable($item['dari'] . '_ttpbs', $item);
+        $this->insertIntoRoleTable($item['ke'] . '_ttpbs', $item);
+    }
+
+    private function insertIntoRoleTable(string $table, array $item): void
+    {
+        if (!\Illuminate\Support\Facades\Schema::hasTable($table)) {
+            return;
+        }
+
+        $columns = [
+            'tanggal',
+            'no_ttpb',
+            'lot_number',
+            'nama_barang',
+            'qty_awal',
+            'qty_aktual',
+            'qty_loss',
+            'persen_loss',
+            'coly',
+            'spec',
+            'keterangan',
+            'dari',
+            'ke',
+        ];
+
+        $data = collect($item)->only($columns)->toArray();
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'kadar_air')) {
+            $data['kadar_air'] = $item['kadar_air'] ?? null;
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'deviasi')) {
+            $data['deviasi'] = $item['deviasi'] ?? null;
+        }
+
+        $data['created_at'] = now();
+        $data['updated_at'] = now();
+
+        DB::table($table)->insert($data);
     }
 
     private function calculateSaldo(string $lot, string $role): float

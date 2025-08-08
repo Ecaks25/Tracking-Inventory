@@ -432,3 +432,42 @@ test('ttpb to gudang appears in source list and gudang stock', function () {
         ->assertOk()
         ->assertSee('LOT-G');
 });
+
+test('store ttpb saves records into role specific tables', function () {
+    $gudangUser = User::factory()->create(['role' => 'gudang']);
+    $this->actingAs($gudangUser);
+
+    \App\Models\Bpg::factory()->create([
+        'lot_number' => 'LOT-R',
+        'qty' => 10,
+        'nama_barang' => 'Barang',
+        'supplier' => 'Supp',
+    ]);
+
+    $payload = [
+        'tanggal' => '2024-01-01',
+        'no_ttpb' => 'TTPB-777',
+        'lot_number' => 'LOT-R',
+        'nama_barang' => 'Barang',
+        'qty_awal' => 5,
+        'qty_aktual' => 5,
+        'qty_loss' => 0,
+        'persen_loss' => 0,
+        'dari' => 'gudang',
+        'ke' => 'pencucian',
+    ];
+
+    $this->post('/gudang/ttpb', $payload)->assertRedirect('/gudang/ttpb/preview');
+
+    $this->assertDatabaseHas('gudang_ttpbs', [
+        'no_ttpb' => 'TTPB-777',
+        'dari' => 'gudang',
+        'ke' => 'pencucian',
+    ]);
+
+    $this->assertDatabaseHas('pencucian_ttpbs', [
+        'no_ttpb' => 'TTPB-777',
+        'dari' => 'gudang',
+        'ke' => 'pencucian',
+    ]);
+});
