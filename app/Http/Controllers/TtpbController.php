@@ -108,9 +108,17 @@ class TtpbController extends Controller
         ]);
 
         $createdIds = [];
+        $role = $validated['items'][0]['dari'];
+
         try {
             DB::beginTransaction();
             foreach ($validated['items'] as $item) {
+                if ($item['dari'] !== $role) {
+                    throw ValidationException::withMessages([
+                        'items.*.dari' => 'Semua baris harus memiliki asal yang sama',
+                    ]);
+                }
+
                 $saldo = $this->calculateSaldo($item['lot_number'], $item['dari']);
 
                 if ($item['qty_awal'] > $saldo) {
@@ -121,7 +129,6 @@ class TtpbController extends Controller
 
                 $record = Ttpb::create($item);
                 $createdIds[] = $record->id;
-                $role = $item['dari'];
             }
             DB::commit();
         } catch (ValidationException $e) {
