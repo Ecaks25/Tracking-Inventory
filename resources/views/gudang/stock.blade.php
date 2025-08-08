@@ -43,12 +43,21 @@
                             <td>{{ $item->diterima }}</td>
                             <td>{{ $item->ttpb }}</td>
                             <td class="d-flex gap-1">
-                                <a href="{{ route('bpg.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <form method="POST" action="{{ route('bpg.destroy', $item) }}" onsubmit="return confirm('Hapus data?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
-                                </form>
+                                @if ($item instanceof \App\Models\Bpg)
+                                    <a href="{{ route('bpg.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
+                                    <form method="POST" action="{{ route('bpg.destroy', $item) }}" onsubmit="return confirm('Hapus data?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
+                                @else
+                                    <a href="{{ route('ttpb.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
+                                    <form method="POST" action="{{ route('ttpb.destroy', $item) }}" onsubmit="return confirm('Hapus data?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty
