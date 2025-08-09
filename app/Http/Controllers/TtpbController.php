@@ -56,12 +56,12 @@ class TtpbController extends Controller
             'coly' => 'nullable|string',
             'spec' => 'nullable|string',
             'keterangan' => 'nullable|string',
-            'ke' => 'nullable|string',
-            'dari' => 'nullable|string',
+            'ke' => 'required|string',
+            'dari' => 'required|string',
         ]);
 
-        // Determine the role from validated data or default to 'gudang'
-        $role = $validated['dari'] ?? 'gudang';
+        // Determine the role from validated data
+        $role = $validated['dari'];
 
         // Update the TTPB record
         $ttpb->update($validated);
@@ -140,19 +140,19 @@ class TtpbController extends Controller
             'items.*.coly' => 'nullable|string',
             'items.*.spec' => 'nullable|string',
             'items.*.keterangan' => 'nullable|string',
-            'items.*.ke' => 'nullable|string',
-            'items.*.dari' => 'nullable|string',
+            'items.*.ke' => 'required|string',
+            'items.*.dari' => 'required|string',
         ]);
 
         $createdIds = [];
-        $role = $validated['items'][0]['dari'] ?? 'gudang';
+        $role = $validated['items'][0]['dari'];
 
         try {
             DB::beginTransaction();
 
             // Process each item and store it
             foreach ($validated['items'] as $item) {
-                if (($item['dari'] ?? $role) !== $role) {
+                if ($item['dari'] !== $role) {
                     throw ValidationException::withMessages([
                         'items.*.dari' => 'Semua baris harus memiliki asal yang sama',
                     ]);

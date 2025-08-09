@@ -40,6 +40,35 @@ test('store ttpb redirects to ttpb index', function () {
     $this->assertDatabaseHas('ttpbs', ['no_ttpb' => 'TTPB-001']);
 });
 
+test('store ttpb requires origin and destination roles', function () {
+    $user = User::factory()->create(['role' => 'gudang']);
+    $this->actingAs($user);
+
+    \App\Models\Bpg::factory()->create([
+        'lot_number' => 'LOT-X',
+        'qty' => 10,
+        'nama_barang' => 'Barang',
+        'supplier' => 'Supp',
+    ]);
+
+    $payload = [
+        'tanggal' => '2024-01-01',
+        'no_ttpb' => 'TTPB-404',
+        'lot_number' => 'LOT-X',
+        'nama_barang' => 'Barang',
+        'qty_awal' => 5,
+        'qty_aktual' => 5,
+        'qty_loss' => 0,
+        'persen_loss' => 0,
+        // intentionally omit dari and ke
+    ];
+
+    $this->post('/gudang/ttpb', $payload)
+        ->assertSessionHasErrors(['items.0.dari', 'items.0.ke']);
+
+    $this->assertDatabaseCount('ttpbs', 0);
+});
+
 test('store ttpb accepts qty values with comma', function () {
     $user = User::factory()->create(['role' => 'gudang']);
     $this->actingAs($user);
