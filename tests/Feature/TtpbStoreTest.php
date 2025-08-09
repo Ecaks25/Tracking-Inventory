@@ -297,6 +297,41 @@ test('qty awal cannot exceed latest saldo', function () {
     $this->assertDatabaseCount('ttpbs', 0);
 });
 
+test('saldo calculation uses actual qty from bpg', function () {
+    $user = User::factory()->create(['role' => 'gudang']);
+    $this->actingAs($user);
+
+    // BPG reports a planned qty higher than the actual received qty
+    \App\Models\Bpg::factory()->create([
+        'lot_number' => 'LOT-ACT',
+        'nama_barang' => 'Barang',
+        'supplier' => 'Supp',
+        'qty' => 10,
+        'qty_aktual' => 8,
+    ]);
+
+    $payload = [
+        'items' => [[
+            'tanggal' => '2024-01-01',
+            'no_ttpb' => 'TTPB-ACT',
+            'lot_number' => 'LOT-ACT',
+            'nama_barang' => 'Barang',
+            'qty_awal' => 9, // exceeds actual saldo of 8
+            'qty_aktual' => 8,
+            'qty_loss' => 1,
+            'persen_loss' => 10,
+            'dari' => 'gudang',
+            'ke' => 'pencucian',
+        ]],
+    ];
+
+    $this->from('/gudang/ttpb/create')
+        ->post('/gudang/ttpb', $payload)
+        ->assertSessionHasErrors('qty_awal');
+
+    $this->assertDatabaseCount('ttpbs', 0);
+});
+
 test('non pencucian role cannot submit moisture or deviation', function () {
     $user = User::factory()->create(['role' => 'gudang']);
     $this->actingAs($user);

@@ -260,7 +260,9 @@ class TtpbController extends Controller
     private function calculateSaldo(string $lot, string $role): float
     {
         if ($role === 'gudang') {
-            $incoming = Bpg::where('lot_number', $lot)->sum('qty')
+            // Use the actual quantity recorded in BPG entries so saldo reflects
+            // real stock instead of the planned quantity.
+            $incoming = Bpg::where('lot_number', $lot)->sum('qty_aktual')
                 + Ttpb::where('ke', 'gudang')->where('lot_number', $lot)->sum('qty_aktual');
             $outgoing = Ttpb::where('dari', 'gudang')->where('lot_number', $lot)->sum('qty_awal');
             return $incoming - $outgoing;
