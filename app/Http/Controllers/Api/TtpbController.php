@@ -33,8 +33,8 @@ class TtpbController extends Controller
             'no_ttpb' => 'nullable|string',
             'lot_number' => 'nullable|string',
             'nama_barang' => 'nullable|string',
-            'qty_awal' => 'nullable|numeric',
-            'qty_aktual' => 'nullable|numeric',
+            'qty_awal' => 'required|numeric',
+            'qty_aktual' => 'required|numeric',
             'qty_loss' => 'nullable|numeric',
             'persen_loss' => 'nullable|numeric',
             'kadar_air' => 'nullable|numeric|prohibited_unless:dari,pencucian',
@@ -47,7 +47,7 @@ class TtpbController extends Controller
         ]);
 
         $saldo = $this->calculateSaldo($validated['lot_number'] ?? '', $validated['dari'] ?? '');
-        if (($validated['qty_awal'] ?? 0) > $saldo) {
+        if ($validated['qty_awal'] > $saldo) {
             return response()->json(['message' => 'QTY tidak mencukupi'], 422);
         }
 
