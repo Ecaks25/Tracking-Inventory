@@ -197,65 +197,56 @@ class TtpbController extends Controller
      * @param array $item
      * @return void
      */
+    /**
+     * Persist copies of a TTPB record into role-scoped tables.
+     *
+     * The main `ttpbs` table already stores the canonical record. To make
+     * data immediately available on each role's own TTPB and stock pages we
+     * duplicate the entry into `<role>_ttpbs` tables for both the source
+     * ("dari") and destination ("ke") roles when those tables exist.
+     */
     private function storeRoleSpecificRecords(array $item): void
     {
-        if (isset($item['dari'])) {
-            $this->insertIntoRoleTable($item['dari'] . '_ttpbs', $item);
-        }
-
-        if (isset($item['ke'])) {
-            $this->insertIntoRoleTable($item['ke'] . '_ttpbs', $item);
+        foreach (['dari', 'ke'] as $key) {
+            if (!empty($item[$key])) {
+                $this->insertIntoRoleTable($item[$key] . '_ttpbs', $item);
+            }
         }
     }
 
     /**
-     * Insert the item data into the specified role table.
-     *
-     * @param string $table
-     * @param array $item
-     * @return void
+     * Insert the item into a role-specific table if the table exists.
      */
     private function insertIntoRoleTable(string $table, array $item): void
     {
-        // Check if the table exists
+        // Skip when the expected table is missing – this allows the code to
+        // run even if a particular role does not maintain its own TTPB table.
         if (!\Illuminate\Support\Facades\Schema::hasTable($table)) {
             return;
         }
 
-        // Define the columns to insert
+        // List of columns shared by all role tables
         $columns = [
-            'tanggal',
-            'no_ttpb',
-            'lot_number',
-            'nama_barang',
-            'qty_awal',
-            'qty_aktual',
-            'qty_loss',
-            'persen_loss',
-            'coly',
-            'spec',
-            'keterangan',
-            'dari',
-            'ke',
+            'tanggal', 'no_ttpb', 'lot_number', 'nama_barang',
+            'qty_awal', 'qty_aktual', 'qty_loss', 'persen_loss',
+            'coly', 'spec', 'keterangan', 'dari', 'ke',
         ];
 
-        // Prepare the data for insertion
+        // Gather available data
         $data = collect($item)->only($columns)->toArray();
 
-        // Add additional fields if necessary
+        // Optional columns for certain roles
         if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'kadar_air')) {
             $data['kadar_air'] = $item['kadar_air'] ?? null;
         }
-
         if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'deviasi')) {
             $data['deviasi'] = $item['deviasi'] ?? null;
         }
 
-        // Add timestamp fields
+        // Manually set timestamps since we're bypassing Eloquent
         $data['created_at'] = now();
         $data['updated_at'] = now();
 
-        // Insert the data into the table
         DB::table($table)->insert($data);
     }
 
