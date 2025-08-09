@@ -84,6 +84,7 @@
                             class="form-control @error('nama_barang') is-invalid @enderror"
                             value="{{ old('nama_barang') }}"
                             required
+                            readonly
                         />
                         @error('nama_barang')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -399,7 +400,7 @@
             // Set nama barang sesuai lot terpilih
             function handleLotChange() {
                 const option = el.lotNumber.options[el.lotNumber.selectedIndex];
-                el.namaBarang.value = option?.dataset?.namaBarang || el.namaBarang.value || '';
+                el.namaBarang.value = option?.dataset?.namaBarang || '';
                 updateMixName();
             }
 
