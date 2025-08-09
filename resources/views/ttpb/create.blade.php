@@ -134,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
     attachEvents(currentRow);
     refreshPreview();
 
+    // Add a new row when clicked
     document.getElementById('add-row').addEventListener('click', function () {
         const clone = currentRow.cloneNode(true);
         copyValues(currentRow, clone);
@@ -152,12 +153,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Function to update name attributes of form elements
     function updateNames(row, i) {
         row.querySelectorAll('[data-name]').forEach(el => {
             el.name = `items[${i}][${el.dataset.name}]`;
         });
     }
 
+    // Function to copy values from one row to another
     function copyValues(source, target) {
         source.querySelectorAll('[data-name]').forEach(el => {
             const dest = target.querySelector(`[data-name="${el.dataset.name}"]`);
@@ -167,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Function to attach event listeners to elements in each row
     function attachEvents(row) {
         row.querySelector('.lot-number').addEventListener('input', function () {
             const option = document.querySelector(`#lot_numbers option[value="${this.value}"]`);
@@ -189,6 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Function to reset a row's input fields
     function resetRow(row) {
         row.querySelectorAll('[data-name]').forEach(el => {
             if (!stickyFields.includes(el.dataset.name)) {
@@ -204,6 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Function to update the preview section
     function refreshPreview() {
         previewContainer.innerHTML = '';
         const dataRows = Array.from(itemsContainer.querySelectorAll('.item-row'))
@@ -225,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Function to collect data from a row
     function collectData(row) {
         return {
             tanggal: row.querySelector('[data-name="tanggal"]').value,
@@ -247,6 +254,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
+    // Function to generate preview card
     function buildCard(number, items) {
         const first = items[0];
         let html = `<div class="card mb-3"><div class="card-body"><div class="mb-3">`;
@@ -268,4 +276,5 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endsection
+
 </x-layouts.app>

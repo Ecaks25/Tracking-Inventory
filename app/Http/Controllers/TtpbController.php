@@ -10,20 +10,38 @@ use Illuminate\Validation\ValidationException;
 
 class TtpbController extends Controller
 {
+    /**
+     * Show the form for editing the specified TTPB record.
+     *
+     * @param Ttpb $ttpb
+     * @return \Illuminate\View\View
+     */
     public function edit(Ttpb $ttpb)
     {
         $lotNumbers = Bpg::pluck('lot_number')->merge(Ttpb::pluck('lot_number'))->unique();
-        return view('ttpb.edit', ['record' => $ttpb, 'lotNumbers' => $lotNumbers]);
+        return view('ttpb.edit', [
+            'record' => $ttpb,
+            'lotNumbers' => $lotNumbers
+        ]);
     }
 
+    /**
+     * Update the specified TTPB record.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param Ttpb $ttpb
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(Request $request, Ttpb $ttpb)
     {
+        // Normalize input values
         $request->merge([
             'qty_awal' => $this->normalizeNumber($request->input('qty_awal')),
             'qty_aktual' => $this->normalizeNumber($request->input('qty_aktual')),
             'qty_loss' => $this->normalizeNumber($request->input('qty_loss')),
         ]);
 
+        // Validate the input
         $validated = $request->validate([
             'tanggal' => 'nullable|date',
             'no_ttpb' => 'nullable|string',
@@ -42,12 +60,21 @@ class TtpbController extends Controller
             'dari' => 'nullable|string',
         ]);
 
+        // Determine the role from validated data or default to 'gudang'
         $role = $validated['dari'] ?? 'gudang';
+
+        // Update the TTPB record
         $ttpb->update($validated);
 
         return redirect()->route("{$role}.ttpb");
     }
 
+    /**
+     * Remove the specified TTPB record from storage.
+     *
+     * @param Ttpb $ttpb
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Ttpb $ttpb)
     {
         $role = $ttpb->dari;
@@ -55,12 +82,16 @@ class TtpbController extends Controller
 
         return redirect()->route("{$role}.ttpb");
     }
+
+    /**
+     * Store a newly created TTPB record(s).
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
-        // Support forms that submit a single record without wrapping fields in an
-        // `items` array. When the request doesn't contain an `items` key we
-        // assume all top level fields represent a single entry and wrap them
-        // accordingly so the rest of the method can handle them uniformly.
+        // Handle the case where a single record is submitted
         if (!$request->has('items')) {
             $single = $request->only([
                 'tanggal',
@@ -82,14 +113,18 @@ class TtpbController extends Controller
             $request->merge(['items' => [$single]]);
         }
 
+        // Normalize item values
         $items = collect($request->input('items', []))->map(function ($item) {
             $item['qty_awal'] = $this->normalizeNumber($item['qty_awal'] ?? null);
             $item['qty_aktual'] = $this->normalizeNumber($item['qty_aktual'] ?? null);
             $item['qty_loss'] = $this->normalizeNumber($item['qty_loss'] ?? null);
             return $item;
         })->toArray();
+
+        // Merge normalized items into the request
         $request->merge(['items' => $items]);
 
+        // Validate the input
         $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.tanggal' => 'nullable|date',
@@ -114,6 +149,8 @@ class TtpbController extends Controller
 
         try {
             DB::beginTransaction();
+
+            // Process each item and store it
             foreach ($validated['items'] as $item) {
                 if (($item['dari'] ?? $role) !== $role) {
                     throw ValidationException::withMessages([
@@ -121,18 +158,23 @@ class TtpbController extends Controller
                     ]);
                 }
 
+                // Check if the quantity is sufficient
                 $saldo = $this->calculateSaldo($item['lot_number'] ?? '', $item['dari'] ?? '');
-
                 if (($item['qty_awal'] ?? 0) > $saldo) {
                     throw ValidationException::withMessages([
                         'qty_awal' => 'QTY tidak mencukupi',
                     ]);
                 }
 
+                // Create the TTPB record
                 $record = Ttpb::create($item);
+
+                // Store role-specific records
                 $this->storeRoleSpecificRecords($item);
+
                 $createdIds[] = $record->id;
             }
+
             DB::commit();
         } catch (ValidationException $e) {
             DB::rollBack();
@@ -141,6 +183,7 @@ class TtpbController extends Controller
                 ->withErrors($e->errors());
         }
 
+        // Merge newly created IDs with existing preview IDs in session
         $existingIds = session()->get("ttpb_preview_ids_{$role}", []);
         $allIds = collect($existingIds)->merge($createdIds)->unique()->values()->all();
         session()->put("ttpb_preview_ids_{$role}", $allIds);
@@ -148,22 +191,38 @@ class TtpbController extends Controller
         return redirect()->route("{$role}.ttpb.preview");
     }
 
+    /**
+     * Store role-specific records in the database.
+     *
+     * @param array $item
+     * @return void
+     */
     private function storeRoleSpecificRecords(array $item): void
     {
         if (isset($item['dari'])) {
             $this->insertIntoRoleTable($item['dari'] . '_ttpbs', $item);
         }
+
         if (isset($item['ke'])) {
             $this->insertIntoRoleTable($item['ke'] . '_ttpbs', $item);
         }
     }
 
+    /**
+     * Insert the item data into the specified role table.
+     *
+     * @param string $table
+     * @param array $item
+     * @return void
+     */
     private function insertIntoRoleTable(string $table, array $item): void
     {
+        // Check if the table exists
         if (!\Illuminate\Support\Facades\Schema::hasTable($table)) {
             return;
         }
 
+        // Define the columns to insert
         $columns = [
             'tanggal',
             'no_ttpb',
@@ -180,8 +239,10 @@ class TtpbController extends Controller
             'ke',
         ];
 
+        // Prepare the data for insertion
         $data = collect($item)->only($columns)->toArray();
 
+        // Add additional fields if necessary
         if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'kadar_air')) {
             $data['kadar_air'] = $item['kadar_air'] ?? null;
         }
@@ -190,19 +251,27 @@ class TtpbController extends Controller
             $data['deviasi'] = $item['deviasi'] ?? null;
         }
 
+        // Add timestamp fields
         $data['created_at'] = now();
         $data['updated_at'] = now();
 
+        // Insert the data into the table
         DB::table($table)->insert($data);
     }
 
+    /**
+     * Calculate the available saldo (balance) for a specific lot.
+     *
+     * @param string $lot
+     * @param string $role
+     * @return float
+     */
     private function calculateSaldo(string $lot, string $role): float
     {
         if ($role === 'gudang') {
             $incoming = Bpg::where('lot_number', $lot)->sum('qty')
                 + Ttpb::where('ke', 'gudang')->where('lot_number', $lot)->sum('qty_aktual');
             $outgoing = Ttpb::where('dari', 'gudang')->where('lot_number', $lot)->sum('qty_awal');
-
             return $incoming - $outgoing;
         }
 
@@ -212,6 +281,12 @@ class TtpbController extends Controller
         return $incoming - $outgoing;
     }
 
+    /**
+     * Normalize a numeric value, handling different formats.
+     *
+     * @param mixed $value
+     * @return float|null
+     */
     private function normalizeNumber($value)
     {
         if ($value === null || $value === '') {
