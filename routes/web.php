@@ -125,7 +125,7 @@ Route::middleware(['auth'])->group(function () {
         ->orderBy('tanggal')
         ->get();
 
-      return view("{$role}.ttpb", ['role' => $role, 'records' => $records]);
+      return view('ttpb.index', ['role' => $role, 'records' => $records]);
     })->name("{$role}.ttpb");
 
     Route::get("{$role}/ttpb/create", function () use ($role, $roles) {
