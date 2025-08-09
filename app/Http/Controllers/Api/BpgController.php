@@ -27,21 +27,21 @@ class BpgController extends Controller
         ]);
 
         $validated = $request->validate([
-            'tanggal' => 'required|date',
-            'no_bpg' => 'required|string',
-            'lot_number' => 'required|string',
-            'supplier' => 'required|string',
-            'nomor_mobil' => 'required|string',
-            'nama_barang' => 'required|string',
-            'qty' => 'required|numeric',
-            'qty_aktual' => 'required|numeric',
+            'tanggal' => 'nullable|date',
+            'no_bpg' => 'nullable|string',
+            'lot_number' => 'nullable|string',
+            'supplier' => 'nullable|string',
+            'nomor_mobil' => 'nullable|string',
+            'nama_barang' => 'nullable|string',
+            'qty' => 'nullable|numeric',
+            'qty_aktual' => 'nullable|numeric',
             'qty_loss' => 'nullable|numeric',
             'coly' => 'nullable|string',
-            'diterima' => 'required|string',
-            'ttpb' => 'required|string',
+            'diterima' => 'nullable|string',
+            'ttpb' => 'nullable|string',
         ]);
 
-        $validated['qty_loss'] = $validated['qty'] - $validated['qty_aktual'];
+        $validated['qty_loss'] = ($validated['qty'] ?? 0) - ($validated['qty_aktual'] ?? 0);
 
         $bpg = Bpg::create($validated);
 
@@ -57,7 +57,7 @@ class BpgController extends Controller
 
     private function normalizeNumber($value)
     {
-        if ($value === null) {
+        if ($value === null || $value === '') {
             return null;
         }
 

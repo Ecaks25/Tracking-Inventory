@@ -25,12 +25,12 @@ class TtpbController extends Controller
         ]);
 
         $validated = $request->validate([
-            'tanggal' => 'required|date',
-            'no_ttpb' => 'required|string',
-            'lot_number' => 'required|string',
-            'nama_barang' => 'required|string',
-            'qty_awal' => 'required|numeric',
-            'qty_aktual' => 'required|numeric',
+            'tanggal' => 'nullable|date',
+            'no_ttpb' => 'nullable|string',
+            'lot_number' => 'nullable|string',
+            'nama_barang' => 'nullable|string',
+            'qty_awal' => 'nullable|numeric',
+            'qty_aktual' => 'nullable|numeric',
             'qty_loss' => 'nullable|numeric',
             'persen_loss' => 'nullable|numeric',
             'kadar_air' => 'nullable|numeric|prohibited_unless:dari,pencucian',
@@ -38,13 +38,14 @@ class TtpbController extends Controller
             'coly' => 'nullable|string',
             'spec' => 'nullable|string',
             'keterangan' => 'nullable|string',
-            'ke' => 'required|string',
-            'dari' => 'required|string',
+            'ke' => 'nullable|string',
+            'dari' => 'nullable|string',
         ]);
 
+        $role = $validated['dari'] ?? 'gudang';
         $ttpb->update($validated);
 
-        return redirect()->route("{$validated['dari']}.ttpb");
+        return redirect()->route("{$role}.ttpb");
     }
 
     public function destroy(Ttpb $ttpb)
@@ -91,12 +92,12 @@ class TtpbController extends Controller
 
         $validated = $request->validate([
             'items' => 'required|array|min:1',
-            'items.*.tanggal' => 'required|date',
-            'items.*.no_ttpb' => 'required|string',
-            'items.*.lot_number' => 'required|string',
-            'items.*.nama_barang' => 'required|string',
-            'items.*.qty_awal' => 'required|numeric',
-            'items.*.qty_aktual' => 'required|numeric',
+            'items.*.tanggal' => 'nullable|date',
+            'items.*.no_ttpb' => 'nullable|string',
+            'items.*.lot_number' => 'nullable|string',
+            'items.*.nama_barang' => 'nullable|string',
+            'items.*.qty_awal' => 'nullable|numeric',
+            'items.*.qty_aktual' => 'nullable|numeric',
             'items.*.qty_loss' => 'nullable|numeric',
             'items.*.persen_loss' => 'nullable|numeric',
             'items.*.kadar_air' => 'nullable|numeric|prohibited_unless:items.*.dari,pencucian',
@@ -104,25 +105,25 @@ class TtpbController extends Controller
             'items.*.coly' => 'nullable|string',
             'items.*.spec' => 'nullable|string',
             'items.*.keterangan' => 'nullable|string',
-            'items.*.ke' => 'required|string',
-            'items.*.dari' => 'required|string',
+            'items.*.ke' => 'nullable|string',
+            'items.*.dari' => 'nullable|string',
         ]);
 
         $createdIds = [];
-        $role = $validated['items'][0]['dari'];
+        $role = $validated['items'][0]['dari'] ?? 'gudang';
 
         try {
             DB::beginTransaction();
             foreach ($validated['items'] as $item) {
-                if ($item['dari'] !== $role) {
+                if (($item['dari'] ?? $role) !== $role) {
                     throw ValidationException::withMessages([
                         'items.*.dari' => 'Semua baris harus memiliki asal yang sama',
                     ]);
                 }
 
-                $saldo = $this->calculateSaldo($item['lot_number'], $item['dari']);
+                $saldo = $this->calculateSaldo($item['lot_number'] ?? '', $item['dari'] ?? '');
 
-                if ($item['qty_awal'] > $saldo) {
+                if (($item['qty_awal'] ?? 0) > $saldo) {
                     throw ValidationException::withMessages([
                         'qty_awal' => 'QTY tidak mencukupi',
                     ]);
@@ -149,8 +150,12 @@ class TtpbController extends Controller
 
     private function storeRoleSpecificRecords(array $item): void
     {
-        $this->insertIntoRoleTable($item['dari'] . '_ttpbs', $item);
-        $this->insertIntoRoleTable($item['ke'] . '_ttpbs', $item);
+        if (isset($item['dari'])) {
+            $this->insertIntoRoleTable($item['dari'] . '_ttpbs', $item);
+        }
+        if (isset($item['ke'])) {
+            $this->insertIntoRoleTable($item['ke'] . '_ttpbs', $item);
+        }
     }
 
     private function insertIntoRoleTable(string $table, array $item): void
@@ -209,7 +214,7 @@ class TtpbController extends Controller
 
     private function normalizeNumber($value)
     {
-        if ($value === null) {
+        if ($value === null || $value === '') {
             return null;
         }
 
