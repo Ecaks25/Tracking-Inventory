@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Ttpb;
 use App\Models\Bpg;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TtpbController extends Controller
 {
@@ -52,6 +53,8 @@ class TtpbController extends Controller
 
         $ttpb = Ttpb::create($validated);
 
+        $this->storeRoleSpecificRecords($validated);
+
         return response()->json($ttpb, 201);
     }
 
@@ -60,6 +63,50 @@ class TtpbController extends Controller
         $ttpb->delete();
 
         return response()->noContent();
+    }
+
+    private function storeRoleSpecificRecords(array $item): void
+    {
+        $this->insertIntoRoleTable($item['dari'] . '_ttpbs', $item);
+        $this->insertIntoRoleTable($item['ke'] . '_ttpbs', $item);
+    }
+
+    private function insertIntoRoleTable(string $table, array $item): void
+    {
+        if (!\Illuminate\Support\Facades\Schema::hasTable($table)) {
+            return;
+        }
+
+        $columns = [
+            'tanggal',
+            'no_ttpb',
+            'lot_number',
+            'nama_barang',
+            'qty_awal',
+            'qty_aktual',
+            'qty_loss',
+            'persen_loss',
+            'coly',
+            'spec',
+            'keterangan',
+            'dari',
+            'ke',
+        ];
+
+        $data = collect($item)->only($columns)->toArray();
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'kadar_air')) {
+            $data['kadar_air'] = $item['kadar_air'] ?? null;
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'deviasi')) {
+            $data['deviasi'] = $item['deviasi'] ?? null;
+        }
+
+        $data['created_at'] = now();
+        $data['updated_at'] = now();
+
+        DB::table($table)->insert($data);
     }
 
     private function calculateSaldo(string $lot, string $role): float
