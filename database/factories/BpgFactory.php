@@ -12,7 +12,6 @@ class BpgFactory extends Factory
     public function definition(): array
     {
         $qty = $this->faker->randomFloat(1, 1, 100);
-        $qtyAktual = $this->faker->randomFloat(1, 0, $qty);
 
         return [
             'tanggal' => now()->toDateString(),
@@ -21,9 +20,11 @@ class BpgFactory extends Factory
             'supplier' => $this->faker->company,
             'nomor_mobil' => strtoupper($this->faker->bothify('?? #### ??')),
             'nama_barang' => $this->faker->word,
+            // Default to no losses; `qty_aktual` will be set in configure()
+            // if not explicitly provided when the factory is used.
             'qty' => $qty,
-            'qty_aktual' => $qtyAktual,
-            'qty_loss' => $qty - $qtyAktual,
+            'qty_aktual' => null,
+            'qty_loss' => 0,
             'coly' => $this->faker->word,
             'diterima' => $this->faker->name,
             'ttpb' => $this->faker->numerify('TTPB-###'),
