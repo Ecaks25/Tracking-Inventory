@@ -47,8 +47,8 @@ class TtpbController extends Controller
             'no_ttpb' => 'nullable|string',
             'lot_number' => 'nullable|string',
             'nama_barang' => 'nullable|string',
-            'qty_awal' => 'nullable|numeric',
-            'qty_aktual' => 'nullable|numeric',
+            'qty_awal' => 'required|numeric',
+            'qty_aktual' => 'required|numeric',
             'qty_loss' => 'nullable|numeric',
             'persen_loss' => 'nullable|numeric',
             'kadar_air' => 'nullable|numeric|prohibited_unless:dari,pencucian',
@@ -131,8 +131,8 @@ class TtpbController extends Controller
             'items.*.no_ttpb' => 'nullable|string',
             'items.*.lot_number' => 'nullable|string',
             'items.*.nama_barang' => 'nullable|string',
-            'items.*.qty_awal' => 'nullable|numeric',
-            'items.*.qty_aktual' => 'nullable|numeric',
+            'items.*.qty_awal' => 'required|numeric',
+            'items.*.qty_aktual' => 'required|numeric',
             'items.*.qty_loss' => 'nullable|numeric',
             'items.*.persen_loss' => 'nullable|numeric',
             'items.*.kadar_air' => 'nullable|numeric|prohibited_unless:items.*.dari,pencucian',
@@ -160,7 +160,7 @@ class TtpbController extends Controller
 
                 // Check if the quantity is sufficient
                 $saldo = $this->calculateSaldo($item['lot_number'] ?? '', $item['dari'] ?? '');
-                if (($item['qty_awal'] ?? 0) > $saldo) {
+                if ($item['qty_awal'] > $saldo) {
                     throw ValidationException::withMessages([
                         'qty_awal' => 'QTY tidak mencukupi',
                     ]);
