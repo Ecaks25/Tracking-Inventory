@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bpg;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class BpgController extends Controller
 {
@@ -24,7 +25,7 @@ class BpgController extends Controller
         $validated = $request->validate([
             'tanggal' => 'nullable|date',
             'no_bpg' => 'nullable|string',
-            'lot_number' => 'nullable|string',
+            'lot_number' => ['nullable', 'string', Rule::unique('bpgs', 'lot_number')->ignore($bpg->id)],
             'supplier' => 'nullable|string',
             'nomor_mobil' => 'nullable|string',
             'nama_barang' => 'nullable|string',
@@ -60,7 +61,7 @@ class BpgController extends Controller
         $validated = $request->validate([
             'tanggal' => 'nullable|date',
             'no_bpg' => 'nullable|string',
-            'lot_number' => 'nullable|string',
+            'lot_number' => 'nullable|string|unique:bpgs,lot_number',
             'supplier' => 'nullable|string',
             'nomor_mobil' => 'nullable|string',
             'nama_barang' => 'nullable|string',
