@@ -31,7 +31,7 @@ class TtpbController extends Controller
         $validated = $request->validate([
             'tanggal' => 'nullable|date',
             'no_ttpb' => 'nullable|string',
-            'lot_number' => 'nullable|string',
+            'lot_number' => 'nullable|string|unique:ttpbs,lot_number',
             'nama_barang' => 'nullable|string',
             'qty_awal' => 'required|numeric',
             'qty_aktual' => 'required|numeric',

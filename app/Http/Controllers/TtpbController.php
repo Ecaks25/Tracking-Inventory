@@ -7,6 +7,7 @@ use App\Models\Bpg;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 
 class TtpbController extends Controller
 {
@@ -45,7 +46,7 @@ class TtpbController extends Controller
         $validated = $request->validate([
             'tanggal' => 'nullable|date',
             'no_ttpb' => 'nullable|string',
-            'lot_number' => 'nullable|string',
+            'lot_number' => ['nullable', 'string', Rule::unique('ttpbs', 'lot_number')->ignore($ttpb->id)],
             'nama_barang' => 'nullable|string',
             'qty_awal' => 'required|numeric',
             'qty_aktual' => 'required|numeric',
@@ -129,7 +130,7 @@ class TtpbController extends Controller
             'items' => 'required|array|min:1',
             'items.*.tanggal' => 'nullable|date',
             'items.*.no_ttpb' => 'nullable|string',
-            'items.*.lot_number' => 'nullable|string',
+            'items.*.lot_number' => 'nullable|string|unique:ttpbs,lot_number',
             'items.*.nama_barang' => 'nullable|string',
             'items.*.qty_awal' => 'required|numeric',
             'items.*.qty_aktual' => 'required|numeric',

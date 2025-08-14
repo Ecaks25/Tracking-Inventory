@@ -214,7 +214,7 @@ test('store ttpb handles single item input without array', function () {
     ]);
 });
 
-test('new record is created when the same lot number is sent again', function () {
+test('duplicate lot number is rejected', function () {
     $user = User::factory()->create(['role' => 'gudang']);
     $this->actingAs($user);
 
@@ -225,43 +225,27 @@ test('new record is created when the same lot number is sent again', function ()
         'supplier' => 'Supp',
     ]);
 
-    $initial = [
-        'tanggal' => '2024-01-01',
-        'no_ttpb' => 'TTPB-001',
-        'lot_number' => 'LOT-1',
-        'nama_barang' => 'Barang',
-        'qty_awal' => 10,
-        'qty_aktual' => 9,
-        'qty_loss' => 1,
-        'persen_loss' => 10,
-        'dari' => 'gudang',
-        'ke' => 'pencucian',
+    $payload = [
+        'items' => [[
+            'tanggal' => '2024-01-01',
+            'no_ttpb' => 'TTPB-001',
+            'lot_number' => 'LOT-1',
+            'nama_barang' => 'Barang',
+            'qty_awal' => 10,
+            'qty_aktual' => 9,
+            'qty_loss' => 1,
+            'persen_loss' => 10,
+            'dari' => 'gudang',
+            'ke' => 'pencucian',
+        ]],
     ];
 
-    \App\Models\Ttpb::create($initial);
+    $this->post('/gudang/ttpb', $payload)->assertRedirect('/gudang/ttpb/preview');
 
-    $additional = $initial;
-    $additional['no_ttpb'] = 'TTPB-001';
-    $additional['qty_awal'] = 5;
-    $additional['qty_aktual'] = 5;
-    $additional['qty_loss'] = 0;
-    $additional['persen_loss'] = 0;
+    $this->post('/gudang/ttpb', $payload)
+        ->assertSessionHasErrors(['items.0.lot_number']);
 
-    $this->post('/gudang/ttpb', ['items' => [$additional]])->assertRedirect('/gudang/ttpb/preview');
-
-    $this->assertDatabaseCount('ttpbs', 2);
-    $this->assertDatabaseHas('ttpbs', [
-        'lot_number' => 'LOT-1',
-        'ke' => 'pencucian',
-        'qty_awal' => 10,
-        'qty_aktual' => 9,
-    ]);
-    $this->assertDatabaseHas('ttpbs', [
-        'lot_number' => 'LOT-1',
-        'ke' => 'pencucian',
-        'qty_awal' => 5,
-        'qty_aktual' => 5,
-    ]);
+    $this->assertDatabaseCount('ttpbs', 1);
 });
 
 test('qty awal cannot exceed latest saldo', function () {
@@ -452,50 +436,6 @@ test('stored ttpb appears in preview and receiving stock', function () {
         ]);
 });
 
-test('ttpb to gudang appears in source list and gudang stock', function () {
-    $pencucianUser = User::factory()->create(['role' => 'pencucian']);
-    $gudangUser = User::factory()->create(['role' => 'gudang']);
-
-    // provide incoming stock for pencucian so saldo is sufficient
-    \App\Models\Ttpb::factory()->create([
-        'tanggal' => '2024-01-01',
-        'no_ttpb' => 'TTPB-099',
-        'lot_number' => 'LOT-G',
-        'nama_barang' => 'Barang',
-        'qty_awal' => 10,
-        'qty_aktual' => 10,
-        'qty_loss' => 0,
-        'persen_loss' => 0,
-        'dari' => 'gudang',
-        'ke' => 'pencucian',
-    ]);
-
-    $this->actingAs($pencucianUser);
-
-    $payload = [
-        'tanggal' => '2024-01-02',
-        'no_ttpb' => 'TTPB-100',
-        'lot_number' => 'LOT-G',
-        'nama_barang' => 'Barang',
-        'qty_awal' => 5,
-        'qty_aktual' => 5,
-        'qty_loss' => 0,
-        'persen_loss' => 0,
-        'dari' => 'pencucian',
-        'ke' => 'gudang',
-    ];
-
-    $this->post('/pencucian/ttpb', $payload)->assertRedirect('/pencucian/ttpb/preview');
-
-    $this->get('/pencucian/ttpb')
-        ->assertOk()
-        ->assertSee('LOT-G');
-
-    $this->actingAs($gudangUser);
-    $this->get('/gudang/stock')
-        ->assertOk()
-        ->assertSee('LOT-G');
-});
 
 test('store ttpb saves records into role specific tables', function () {
     $gudangUser = User::factory()->create(['role' => 'gudang']);

@@ -29,7 +29,7 @@ class BpgController extends Controller
         $validated = $request->validate([
             'tanggal' => 'nullable|date',
             'no_bpg' => 'nullable|string',
-            'lot_number' => 'nullable|string',
+            'lot_number' => 'nullable|string|unique:bpgs,lot_number',
             'supplier' => 'nullable|string',
             'nomor_mobil' => 'nullable|string',
             'nama_barang' => 'nullable|string',

@@ -40,15 +40,6 @@ test('gudang monitoring shows sequential entries with running saldo', function (
     Ttpb::factory()->create([
         'lot_number' => 'LOT-2',
         'nama_barang' => 'Barang',
-        'qty_awal' => 5,
-        'qty_aktual' => 5,
-        'dari' => 'mixing',
-        'ke' => 'gudang',
-    ]);
-
-    Ttpb::factory()->create([
-        'lot_number' => 'LOT-2',
-        'nama_barang' => 'Barang',
         'qty_awal' => 3,
         'qty_aktual' => 3,
         'dari' => 'gudang',
@@ -58,12 +49,10 @@ test('gudang monitoring shows sequential entries with running saldo', function (
     $this->get('/gudang/monitoring?lot=LOT-2')
         ->assertOk()
         ->assertViewHas('records', function ($records) {
-            return $records->count() === 3
+            return $records->count() === 2
                 && $records[0]['qty_in_bpg'] == 10
                 && $records[0]['saldo'] == 10
-                && $records[1]['qty_in_ttpb'] == 5
-                && $records[1]['saldo'] == 15
-                && $records[2]['qty_out_ttpb'] == 3
-                && $records[2]['saldo'] == 12;
+                && $records[1]['qty_out_ttpb'] == 3
+                && $records[1]['saldo'] == 7;
         });
 });
