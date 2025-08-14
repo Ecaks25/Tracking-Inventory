@@ -14,6 +14,12 @@
                 </div>
             @endif
 
+            @if (in_array($role, ['gudang', 'pencucian', 'pengeringan', 'blower']))
+                <button type="button" id="copy-last-btn" class="btn btn-outline-secondary mb-3">
+                    {{ __('Copy dari entri terakhir') }}
+                </button>
+            @endif
+
             <form method="POST" action="{{ route($role . '.ttpb.store') }}" novalidate>
                 @csrf
 
@@ -395,7 +401,69 @@
                 qtyAktualMix: document.getElementById('qty_aktual_mix'),
                 lossGdMix: document.getElementById('loss_gd_mix'),
                 lossAktualMix: document.getElementById('loss_aktual_mix'),
+                coly: document.getElementById('coly'),
+                spec: document.getElementById('spec'),
+                keterangan: document.getElementById('keterangan'),
             };
+
+            const role = @json($role);
+            const copyBtn = document.getElementById('copy-last-btn');
+
+            function fillFields(data) {
+                if (!data) return;
+                if (data.lot_number) {
+                    el.lotNumber.value = data.lot_number;
+                }
+                if (data.nama_barang) {
+                    el.namaBarang.value = data.nama_barang;
+                }
+                const qty = data.qty_aktual ?? data.qty ?? null;
+                if (qty !== null) {
+                    el.qtyAwal.value = qty;
+                    el.qtyAktual.value = qty;
+                }
+                if (data.qty_loss !== undefined) {
+                    el.qtyLoss.value = data.qty_loss;
+                }
+                if (data.persen_loss !== undefined) {
+                    el.persenLoss.value = data.persen_loss;
+                }
+                if (data.coly) {
+                    el.coly.value = data.coly;
+                }
+                if (data.spec) {
+                    el.spec.value = data.spec;
+                }
+                if (data.keterangan) {
+                    el.keterangan.value = data.keterangan;
+                }
+                updateLoss();
+            }
+
+            async function fetchByLot(lot) {
+                if (!lot) return;
+                const url = role === 'gudang'
+                    ? `/gudang/api/bpg/${lot}`
+                    : `/${role}/api/ttpb/${lot}`;
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const data = await res.json();
+                        fillFields(data);
+                    }
+                } catch (e) {}
+            }
+
+            async function copyLast() {
+                try {
+                    const res = await fetch(`/${role}/api/ttpb-last`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        fillFields(data);
+                        handleLotChange();
+                    }
+                } catch (e) {}
+            }
 
             // Set nama barang sesuai lot terpilih
             function handleLotChange() {
@@ -458,16 +526,21 @@
             }
 
             // Event listeners
-            el.lotNumber?.addEventListener('change', handleLotChange);
+            el.lotNumber?.addEventListener('change', () => {
+                handleLotChange();
+                fetchByLot(el.lotNumber.value);
+            });
             el.lotNumberMix?.addEventListener('change', updateMixName);
             el.qtyAwal?.addEventListener('input', updateLoss);
             el.qtyAktual?.addEventListener('input', updateLoss);
             el.ke?.addEventListener('change', toggleMixOption);
             el.diMix?.addEventListener('change', toggleMixDetails);
+            copyBtn?.addEventListener('click', copyLast);
 
             // ===== INIT STATE AWAL (ikuti old()) =====
             // 1) Set nama barang dari lot jika kosong
             handleLotChange();
+            fetchByLot(el.lotNumber.value);
 
             // 2) Hitung ulang loss jika qty ada di old()
             updateLoss();

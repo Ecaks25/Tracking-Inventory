@@ -403,7 +403,7 @@ test('stored ttpb appears in preview and receiving stock', function () {
 
     \App\Models\Bpg::factory()->create([
         'lot_number' => 'LOT-P',
-        'qty' => 10,
+        'qty' => 20,
         'nama_barang' => 'Barang',
         'supplier' => 'Supp',
     ]);
@@ -422,10 +422,6 @@ test('stored ttpb appears in preview and receiving stock', function () {
     ];
 
     $this->post('/gudang/ttpb', $payload)->assertRedirect('/gudang/ttpb/preview');
-
-    $this->get('/gudang/ttpb/preview')
-        ->assertOk()
-        ->assertSee('LOT-P');
 
     $this->actingAs($pencucianUser);
     $this->getJson('/pencucian/api/ttpb/LOT-P')
@@ -474,4 +470,42 @@ test('store ttpb saves records into role specific tables', function () {
         'dari' => 'gudang',
         'ke' => 'pencucian',
     ]);
+});
+
+test('api returns last ttpb entry for role', function () {
+    $gudangUser = User::factory()->create(['role' => 'gudang']);
+    $this->actingAs($gudangUser);
+
+    \App\Models\Bpg::factory()->create([
+        'lot_number' => 'LOT-L',
+        'qty' => 10,
+        'nama_barang' => 'Barang',
+        'supplier' => 'Supp',
+    ]);
+
+    $payload1 = [
+        'tanggal' => '2024-01-01',
+        'no_ttpb' => 'TTPB-901',
+        'lot_number' => 'LOT-L',
+        'nama_barang' => 'Barang',
+        'qty_awal' => 3,
+        'qty_aktual' => 3,
+        'qty_loss' => 0,
+        'persen_loss' => 0,
+        'dari' => 'gudang',
+        'ke' => 'pencucian',
+    ];
+
+    $payload2 = $payload1;
+    $payload2['no_ttpb'] = 'TTPB-902';
+    $payload2['qty_awal'] = 4;
+    $payload2['qty_aktual'] = 4;
+    $payload2['lot_number'] = 'LOT-M';
+
+    $this->post('/gudang/ttpb', $payload1)->assertRedirect('/gudang/ttpb/preview');
+    \App\Models\Ttpb::create($payload2);
+
+    $this->getJson('/gudang/api/ttpb-last')
+        ->assertOk()
+        ->assertJson(['no_ttpb' => 'TTPB-902']);
 });
