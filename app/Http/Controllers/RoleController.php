@@ -240,7 +240,9 @@ class RoleController extends Controller
     public function gudangBpg(string $lotNumber)
     {
         return Bpg::where('lot_number', $lotNumber)
-            ->first(['nama_barang', 'qty']);
+            ->orderByDesc('tanggal')
+            ->orderByDesc('id')
+            ->first(['nama_barang', 'qty', 'qty_aktual', 'coly']);
     }
 
     public function roleTtpbShow(string $role, string $lotNumber)
@@ -249,7 +251,19 @@ class RoleController extends Controller
 
         return Ttpb::where('ke', $role)
             ->where('lot_number', $lotNumber)
-            ->first(['nama_barang', 'qty_aktual']);
+            ->orderByDesc('tanggal')
+            ->orderByDesc('id')
+            ->first(['nama_barang', 'qty_aktual', 'qty_loss', 'persen_loss', 'coly', 'spec', 'keterangan']);
+    }
+
+    public function roleTtpbLast(string $role)
+    {
+        abort_unless(in_array($role, $this->roles), 404);
+
+        return Ttpb::where('dari', $role)
+            ->orderByDesc('tanggal')
+            ->orderByDesc('id')
+            ->first();
     }
 }
 

@@ -54,6 +54,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('{role}/api/ttpb/{lotNumber}', [RoleController::class, 'roleTtpbShow'])
         ->whereIn('role', $roles)
         ->name('role.ttpb.show');
+    Route::get('{role}/api/ttpb-last', [RoleController::class, 'roleTtpbLast'])
+        ->whereIn('role', $roles)
+        ->name('role.ttpb.last');
 });
 
 require __DIR__ . '/auth.php';
